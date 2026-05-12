@@ -2,6 +2,8 @@
 
 HL7 Reader keeps the current Tauri implementation at the workspace root and the previous Electron implementation under `archive/electron-v1` for reference.
 
+For build history, release steps, and troubleshooting notes, see `BUILD_HISTORY.md`.
+
 ## Version 2 Tauri App
 
 The primary `2.0.0` implementation lives at the workspace root.

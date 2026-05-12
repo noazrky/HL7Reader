@@ -2,6 +2,11 @@
 
 All project changes are tracked using the `Major.Minor.Change` version format described in `VERSIONING.md`.
 
+## 2.0.3 - 2026-05-12 16:43:44
+
+- Hid the native File/Edit/View/Help menu bar from the Help window while leaving the main window menu toggle unchanged.
+- Verified the parser tests, frontend build, Rust check, and Tauri release build for the Help-window menu change.
+
 ## 2.0.2 - 2026-05-12 16:00:45
 
 - Added broader datatype component labels for common composite values such as message type, processing ID, version, organization, quantity, driver license, financial class, job code, and generic CM fields.

@@ -158,13 +158,15 @@ fn open_about_window(app: &tauri::AppHandle) -> tauri::Result<()> {
         return Ok(());
     }
 
-    WebviewWindowBuilder::new(app, ABOUT_LABEL, WebviewUrl::App("about.html".into()))
-        .title(format!("About {APP_NAME}"))
-        .inner_size(640.0, 620.0)
-        .min_inner_size(420.0, 460.0)
-        .resizable(true)
-        .focused(true)
-        .build()?;
+    let about_window =
+        WebviewWindowBuilder::new(app, ABOUT_LABEL, WebviewUrl::App("about.html".into()))
+            .title(format!("About {APP_NAME}"))
+            .inner_size(640.0, 620.0)
+            .min_inner_size(420.0, 460.0)
+            .resizable(true)
+            .focused(true)
+            .build()?;
+    about_window.hide_menu()?;
 
     Ok(())
 }
