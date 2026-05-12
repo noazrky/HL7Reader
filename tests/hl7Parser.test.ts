@@ -253,6 +253,75 @@ describe('parseHl7', () => {
     })
   })
 
+  it('labels complete HL7 v2.4 order entry, diet, supply, and pharmacy/treatment specs', () => {
+    const makeSegment = (
+      id: string,
+      fieldCount: number,
+      values: Record<number, string>
+    ): string => {
+      const fields = Array.from({ length: fieldCount }, (_, index) => values[index + 1] ?? '')
+      return `${id}|${fields.join('|')}`
+    }
+
+    const parsed = parseHl7([
+      'MSH|^~\\&|ORDERS|HOSP|EHR|HOSP|202405091105||ORM^O01|MSG00012|P|2.4',
+      makeSegment('ORC', 25, { 1: 'NW', 25: 'MOD^Order modifier^L' }),
+      makeSegment('BLG', 3, { 1: 'CH', 3: 'ACCT123' }),
+      makeSegment('OBR', 47, { 4: 'TEST^Test order^L', 47: 'FILL^Filler supplemental^L' }),
+      makeSegment('ODS', 4, { 3: 'DIET^Diet order^L' }),
+      makeSegment('ODT', 3, { 3: 'Tray instruction' }),
+      makeSegment('RQD', 10, { 10: '20240510' }),
+      makeSegment('RQ1', 7, { 7: 'Y' }),
+      makeSegment('RXO', 24, { 24: 'SUP^Supplementary^L' }),
+      makeSegment('RXR', 5, { 5: 'ROUTE^Routing instruction^L' }),
+      makeSegment('RXC', 7, { 7: 'SUP^Supplementary^L' }),
+      makeSegment('RXE', 31, { 31: 'SUP^Supplementary^L' }),
+      makeSegment('RXD', 27, { 27: 'PACK^Packaging location^L' }),
+      makeSegment('RXG', 22, { 22: 'IND^Indication^L' }),
+      makeSegment('RXA', 22, { 22: '202405091106' })
+    ].join('\r'))
+
+    const byId = new Map(parsed.segments.map((segment) => [segment.id, segment]))
+
+    expect(byId.get('BLG')).toMatchObject({ name: 'Billing' })
+    expect(byId.get('ORC')?.fields.find((field) => field.path === 'ORC-25')).toMatchObject({
+      name: 'Order Status Modifier',
+      datatype: 'CWE'
+    })
+    expect(byId.get('OBR')?.fields.find((field) => field.path === 'OBR-47')).toMatchObject({
+      name: 'Filler Supplemental Service Information',
+      datatype: 'CE'
+    })
+    expect(byId.get('ODS')?.fields.find((field) => field.path === 'ODS-3')).toMatchObject({
+      name: 'Diet, Supplement, or Preference Code',
+      datatype: 'CE'
+    })
+    expect(byId.get('RQD')?.fields.find((field) => field.path === 'RQD-10')).toMatchObject({
+      name: 'Date Needed',
+      datatype: 'DT'
+    })
+    expect(byId.get('RXO')?.fields.find((field) => field.path === 'RXO-24')).toMatchObject({
+      name: 'Supplementary Code',
+      datatype: 'CE'
+    })
+    expect(byId.get('RXE')?.fields.find((field) => field.path === 'RXE-31')).toMatchObject({
+      name: 'Supplementary Code',
+      datatype: 'CE'
+    })
+    expect(byId.get('RXD')?.fields.find((field) => field.path === 'RXD-27')).toMatchObject({
+      name: 'Packaging/Assembly Location',
+      datatype: 'CE'
+    })
+    expect(byId.get('RXG')?.fields.find((field) => field.path === 'RXG-22')).toMatchObject({
+      name: 'Indication',
+      datatype: 'CE'
+    })
+    expect(byId.get('RXA')?.fields.find((field) => field.path === 'RXA-22')).toMatchObject({
+      name: 'System Entry Date/Time',
+      datatype: 'TS'
+    })
+  })
+
   it('labels HL7 v2.4 scheduling notification messages and resource segments', () => {
     const parsed = parseHl7([
       'MSH|^~\\&|SCHED|CLINIC|EHR|CLINIC|202405091105||SIU^S12|MSG00010|P|2.4',
