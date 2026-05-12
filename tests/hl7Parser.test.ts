@@ -396,6 +396,108 @@ describe('parseHl7', () => {
     })
   })
 
+  it('labels additional composite datatype components used by known segments', () => {
+    const makeSegment = (
+      id: string,
+      fieldCount: number,
+      values: Record<number, string>
+    ): string => {
+      const fields = Array.from({ length: fieldCount }, (_, index) => values[index + 1] ?? '')
+      return `${id}|${fields.join('|')}`
+    }
+
+    const parsed = parseHl7([
+      'MSH|^~\\&|REG|HOSP|EHR|HOSP|202405091105||ADT^A01^ADT_A01|MSG00013|P^T|2.4^USA^HL70471',
+      makeSegment('PID', 20, {
+        3: '123456^^^HOSP^MR',
+        5: 'Doe^Jane^A',
+        20: 'A1234567^MA^20280509'
+      }),
+      makeSegment('NK1', 11, {
+        2: 'Smith^Sam',
+        3: 'SPO',
+        11: 'Analyst^IT^Interface analyst'
+      }),
+      makeSegment('PV1', 20, {
+        2: 'I',
+        3: '3N^301^A^HOSP',
+        7: '1234^Smith^John',
+        19: 'V12345',
+        20: 'PPO^20240509'
+      }),
+      makeSegment('ORC', 8, {
+        1: 'NW',
+        2: 'P123',
+        3: 'F456',
+        8: 'PARENT1^PARENT2'
+      }),
+      makeSegment('OBR', 9, {
+        1: '1',
+        2: 'P123',
+        3: 'F456',
+        4: 'CBC^Complete blood count^L',
+        9: '10^mL'
+      }),
+      makeSegment('IN1', 4, {
+        1: '1',
+        2: 'PLAN^Plan name^L',
+        3: '12345^INSCO^ISO',
+        4: 'Acme Insurance^L^999^7^M11^AUTH^XX^FAC^A^ORGID'
+      })
+    ].join('\r'))
+
+    const getComponents = (path: string) => {
+      const field = parsed.segments
+        .flatMap((segment) => segment.fields)
+        .find((candidate) => candidate.path === path)
+
+      return field?.repetitions[0]?.components ?? []
+    }
+
+    expect(getComponents('MSH-9').map((component) => component.name)).toEqual([
+      'Message Code',
+      'Trigger Event',
+      'Message Structure'
+    ])
+    expect(getComponents('MSH-11').map((component) => component.name)).toEqual([
+      'Processing ID',
+      'Processing Mode'
+    ])
+    expect(getComponents('MSH-12').map((component) => component.name)).toEqual([
+      'Version ID',
+      'Internationalization Code',
+      'International Version ID'
+    ])
+    expect(getComponents('IN1-4').slice(0, 4).map((component) => component.name)).toEqual([
+      'Organization Name',
+      'Organization Name Type Code',
+      'ID Number',
+      'Check Digit'
+    ])
+    expect(getComponents('OBR-9').map((component) => component.name)).toEqual([
+      'Quantity',
+      'Units'
+    ])
+    expect(getComponents('PID-20').map((component) => component.name)).toEqual([
+      'License Number',
+      'Issuing State, Province, Country',
+      'Expiration Date'
+    ])
+    expect(getComponents('NK1-11').map((component) => component.name)).toEqual([
+      'Job Code',
+      'Job Class',
+      'Job Description Text'
+    ])
+    expect(getComponents('PV1-20').map((component) => component.name)).toEqual([
+      'Financial Class Code',
+      'Effective Date'
+    ])
+    expect(getComponents('ORC-8').map((component) => component.name)).toEqual([
+      'Composite Component 1',
+      'Composite Component 2'
+    ])
+  })
+
   it('returns an empty parse for blank input', () => {
     const parsed = parseHl7('   \r\n  ')
 
