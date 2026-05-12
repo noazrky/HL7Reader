@@ -6,6 +6,14 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.0.3',
+    date: '2026-05-12',
+    changes: [
+      'Hid the native File/Edit/View/Help menu bar from the Help window while leaving the main window menu toggle unchanged.',
+      'Verified the parser tests, frontend build, Rust check, and Tauri release build for the Help-window menu change.'
+    ]
+  },
+  {
     version: '2.0.2',
     date: '2026-05-12',
     changes: [
