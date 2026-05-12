@@ -19,6 +19,8 @@ npm run build
 npm run tauri:build
 ```
 
+When application behavior, build requirements, supported HL7 coverage, or release packaging changes, update `README.md` as part of the same build/release work so the public project documentation stays accurate.
+
 `npm run tauri:build` compiles the direct Tauri EXE without an installer bundle and copies the versioned EXE into the root `release` folder for easy access. If you only need the raw Tauri compile without publishing to `release`, run `npm run tauri:compile`.
 
 On this machine, run the Tauri release build from the Visual Studio 2019 Build Tools developer environment so Rust can find the MSVC runtime libraries.
