@@ -6,7 +6,7 @@ Project versions use the format `Major.Minor.Change`.
 - `Minor`: second number, used for minor version releases.
 - `Change`: third number, used for smaller change releases.
 
-Current version: `2.0.1`.
+Current version: `2.0.2`.
 
 ## Codebase Layout
 

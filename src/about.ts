@@ -4,7 +4,7 @@ import { releaseNotes } from '@shared/releaseNotes'
 import './styles/about.css'
 
 const appDisplayName = 'HL7 Reader'
-const currentVersion = '2.0.1'
+const currentVersion = '2.0.2'
 const about = document.querySelector<HTMLElement>('#about')
 
 if (!about) {

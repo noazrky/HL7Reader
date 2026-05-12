@@ -6,6 +6,14 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.0.2',
+    date: '2026-05-12',
+    changes: [
+      'Added broader datatype component labels for common composite values such as message type, processing ID, version, organization, quantity, driver license, financial class, job code, and generic CM fields.',
+      'Added parser regression coverage for the newly labeled datatype components.'
+    ]
+  },
+  {
     version: '2.0.1',
     date: '2026-05-12',
     changes: [

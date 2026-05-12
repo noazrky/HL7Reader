@@ -2,6 +2,11 @@
 
 All project changes are tracked using the `Major.Minor.Change` version format described in `VERSIONING.md`.
 
+## 2.0.2 - 2026-05-12 16:00:45
+
+- Added broader datatype component labels for common composite values such as message type, processing ID, version, organization, quantity, driver license, financial class, job code, and generic CM fields.
+- Added parser regression coverage for the newly labeled datatype components.
+
 ## 2.0.1 - 2026-05-12 15:29:23
 
 - Expanded the HL7 v2.4 library specs with full Chapter 4 order entry, diet, supply, pharmacy/treatment, and Chapter 10 scheduling segment field definitions.

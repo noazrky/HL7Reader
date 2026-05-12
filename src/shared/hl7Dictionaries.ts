@@ -888,6 +888,22 @@ export const datatypeComponentNames: Record<string, Record<number, string>> = {
     8: 'Alternate Coding System Version ID',
     9: 'Original Text'
   },
+  CM: {
+    1: 'Composite Component 1',
+    2: 'Composite Component 2',
+    3: 'Composite Component 3',
+    4: 'Composite Component 4',
+    5: 'Composite Component 5',
+    6: 'Composite Component 6',
+    7: 'Composite Component 7',
+    8: 'Composite Component 8',
+    9: 'Composite Component 9',
+    10: 'Composite Component 10'
+  },
+  CQ: {
+    1: 'Quantity',
+    2: 'Units'
+  },
   CX: {
     1: 'ID Number',
     2: 'Check Digit',
@@ -900,16 +916,35 @@ export const datatypeComponentNames: Record<string, Record<number, string>> = {
     9: 'Assigning Jurisdiction',
     10: 'Assigning Agency or Department'
   },
+  DLN: {
+    1: 'License Number',
+    2: 'Issuing State, Province, Country',
+    3: 'Expiration Date'
+  },
   EI: {
     1: 'Entity Identifier',
     2: 'Namespace ID',
     3: 'Universal ID',
     4: 'Universal ID Type'
   },
+  FC: {
+    1: 'Financial Class Code',
+    2: 'Effective Date'
+  },
   HD: {
     1: 'Namespace ID',
     2: 'Universal ID',
     3: 'Universal ID Type'
+  },
+  JCC: {
+    1: 'Job Code',
+    2: 'Job Class',
+    3: 'Job Description Text'
+  },
+  MSG: {
+    1: 'Message Code',
+    2: 'Trigger Event',
+    3: 'Message Structure'
   },
   PL: {
     1: 'Point of Care',
@@ -921,6 +956,10 @@ export const datatypeComponentNames: Record<string, Record<number, string>> = {
     7: 'Building',
     8: 'Floor',
     9: 'Location Description'
+  },
+  PT: {
+    1: 'Processing ID',
+    2: 'Processing Mode'
   },
   TS: {
     1: 'Time',
@@ -953,6 +992,11 @@ export const datatypeComponentNames: Record<string, Record<number, string>> = {
     9: 'Conjunction',
     10: 'Order Sequencing'
   },
+  VID: {
+    1: 'Version ID',
+    2: 'Internationalization Code',
+    3: 'International Version ID'
+  },
   XAD: {
     1: 'Street Address',
     2: 'Other Designation',
@@ -983,6 +1027,18 @@ export const datatypeComponentNames: Record<string, Record<number, string>> = {
     16: 'Name Context',
     17: 'Name Validity Range',
     18: 'Name Assembly Order'
+  },
+  XON: {
+    1: 'Organization Name',
+    2: 'Organization Name Type Code',
+    3: 'ID Number',
+    4: 'Check Digit',
+    5: 'Check Digit Scheme',
+    6: 'Assigning Authority',
+    7: 'Identifier Type Code',
+    8: 'Assigning Facility',
+    9: 'Name Representation Code',
+    10: 'Organization Identifier'
   },
   XPN: {
     1: 'Family Name',
