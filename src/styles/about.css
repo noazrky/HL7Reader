@@ -1,0 +1,147 @@
+:root {
+  color: #f2f5f8;
+  background: #0f141b;
+  color-scheme: dark;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 360px;
+  background: #0f141b;
+  color: #f2f5f8;
+}
+
+main {
+  padding: 24px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #29333e;
+}
+
+img {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 24%);
+}
+
+h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.current-version {
+  margin: 2px 0 0;
+  color: #b8c2cc;
+}
+
+h2 {
+  margin: 22px 0 10px;
+  color: #f2f5f8;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.release-list {
+  display: grid;
+  gap: 8px;
+}
+
+.release-note {
+  border: 1px solid #33404d;
+  border-radius: 8px;
+  background: #151c24;
+  overflow: hidden;
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+  color: #eef3f7;
+  font-weight: 620;
+}
+
+summary::before {
+  content: ">";
+  width: 14px;
+  color: #9ba8b5;
+  transition: transform 120ms ease;
+}
+
+details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary span {
+  flex: 1;
+}
+
+time {
+  color: #9edbd2;
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 18px 16px 42px;
+  border-top: 1px solid #29333e;
+  background: #10171f;
+  color: #d4dde5;
+}
+
+button {
+  display: block;
+  min-width: 84px;
+  margin: 18px 0 0 auto;
+  padding: 8px 14px;
+  border: 1px solid #3b4653;
+  border-radius: 8px;
+  background: #151c24;
+  color: #dce4eb;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: #5fd0bd;
+  background: #1b2630;
+}
+
+summary:focus-visible,
+button:focus-visible {
+  outline: 3px solid rgb(95 208 189 / 72%);
+  outline-offset: 2px;
+}

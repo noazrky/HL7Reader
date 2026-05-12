@@ -1,0 +1,27 @@
+{
+  "name": "hl7-reader",
+  "version": "2.0.0",
+  "description": "Tauri desktop implementation of HL7 Reader",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1420",
+    "build": "tsc --noEmit && vite build --configLoader runner",
+    "test": "vitest run --config vitest.config.ts --configLoader runner",
+    "tauri": "tauri",
+    "tauri:compile": "tauri build --no-bundle",
+    "release:copy": "powershell -ExecutionPolicy Bypass -File scripts/copy-release.ps1",
+    "tauri:build": "npm run tauri:compile && npm run release:copy",
+    "dist": "npm run tauri:build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.9.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.9.0",
+    "@types/node": "^22.19.19",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.1",
+    "vitest": "^3.0.8"
+  }
+}
