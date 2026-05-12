@@ -2,6 +2,11 @@
 
 All project changes are tracked using the `Major.Minor.Change` version format described in `VERSIONING.md`.
 
+## 2.0.1 - 2026-05-12 15:29:23
+
+- Expanded the HL7 v2.4 library specs with full Chapter 4 order entry, diet, supply, pharmacy/treatment, and Chapter 10 scheduling segment field definitions.
+- Added parser regression coverage for the newly covered Chapter 4 segment families and terminal fields.
+
 ## 2.0.0 - 2026-05-11 12:24:57
 
 - Added a Tauri-based desktop codebase under `tauri-spike` as the primary v2 implementation.

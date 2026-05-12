@@ -6,6 +6,14 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.0.1',
+    date: '2026-05-12',
+    changes: [
+      'Expanded the HL7 v2.4 library specs with full Chapter 4 order entry, diet, supply, pharmacy/treatment, and Chapter 10 scheduling segment field definitions.',
+      'Added parser regression coverage for the newly covered Chapter 4 segment families and terminal fields.'
+    ]
+  },
+  {
     version: '2.0.0',
     date: '2026-05-11',
     changes: [
