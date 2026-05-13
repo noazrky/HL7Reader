@@ -10,6 +10,7 @@ export const releaseNotes: ReleaseNote[] = [
     date: '2026-05-13',
     changes: [
       'Expanded the main workspace across wide app windows so the pasted message editor and parsed structure have more usable room.',
+      'Made wrapped logical HL7 message rows easier to see with a stronger yellow highlight in the paste editor.',
       'Added layout regression coverage for the wider workspace behavior.'
     ]
   },

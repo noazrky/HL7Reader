@@ -14,6 +14,7 @@
   --warning-bg: #191611;
   --warning-line: #a88038;
   --warning-ink: #f3d18c;
+  --wrap-highlight: #5a3f08;
   --shadow: 0 18px 40px rgb(0 0 0 / 38%);
   --sticky-offset: 12px;
   color: var(--ink);
@@ -42,6 +43,7 @@
   --warning-bg: #fff7e8;
   --warning-line: #c47a12;
   --warning-ink: #754607;
+  --wrap-highlight: #fff1a8;
   --shadow: 0 18px 36px rgb(39 55 77 / 12%);
 }
 
@@ -238,7 +240,7 @@ h2 {
 
 .message-line.is-wrapped {
   border-radius: 4px;
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  background: var(--wrap-highlight);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }

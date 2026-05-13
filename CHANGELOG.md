@@ -12,6 +12,7 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 ## 2.1.4 - 2026-05-13 07:30:17
 
 - Expanded the main workspace across wide app windows so the pasted message editor and parsed structure have more usable room.
+- Made wrapped logical HL7 message rows easier to see with a stronger yellow highlight in the paste editor.
 - Added layout regression coverage for the wider workspace behavior.
 
 ## 2.1.3 - 2026-05-13 07:11:20
