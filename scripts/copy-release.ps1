@@ -7,6 +7,16 @@ $tauriConfigPath = Join-Path $root 'src-tauri\tauri.conf.json'
 $cargoTomlPath = Join-Path $root 'src-tauri\Cargo.toml'
 $releaseDir = Join-Path $root 'release'
 
+Push-Location -LiteralPath $root
+try {
+  & npm run tauri:compile
+  if ($LASTEXITCODE -ne 0) {
+    throw "npm run tauri:compile failed with exit code $LASTEXITCODE"
+  }
+} finally {
+  Pop-Location
+}
+
 $version = (Get-Content -LiteralPath $versionPath -Raw).Trim()
 if ($version -notmatch '^\d+\.\d+\.\d+$') {
   throw "VERSION must use Major.Minor.Change format, received: $version"
@@ -51,7 +61,7 @@ $cargoName = $cargoNameMatch.Groups[1].Value
 $sourceExe = Join-Path $root "src-tauri\target\release\$cargoName.exe"
 
 if (-not (Test-Path -LiteralPath $sourceExe)) {
-  throw "Compiled Tauri EXE not found: $sourceExe. Run npm run tauri:compile first."
+  throw "Compiled Tauri EXE not found after npm run tauri:compile: $sourceExe"
 }
 
 New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null

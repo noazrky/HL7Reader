@@ -16,26 +16,27 @@ const mismatches = []
 
 syncJsonVersion('package.json', (json, path) => {
   recordMismatch(path, 'version', json.version, version)
-  return replaceRequired(path, /^  "version": "([^"]+)"/m, version)
+  json.version = version
+  return json
 })
 
 syncJsonVersion('package-lock.json', (json, path) => {
+  if (!json.packages || typeof json.packages !== 'object' || !json.packages['']) {
+    throw new Error(`Could not find root package metadata in ${path}`)
+  }
+
   recordMismatch(path, 'version', json.version, version)
   recordMismatch(path, 'packages[""].version', json.packages[''].version, version)
 
-  let updated = replaceRequired(path, /^  "version": "([^"]+)"/m, version)
-  updated = replaceRequired(
-    path,
-    /("": \{\r?\n      "name": "hl7-reader",\r?\n      "version": ")([^"]+)(")/,
-    version,
-    updated
-  )
-  return updated
+  json.version = version
+  json.packages[''].version = version
+  return json
 })
 
 syncJsonVersion('src-tauri/tauri.conf.json', (json, path) => {
   recordMismatch(path, 'version', json.version, version)
-  return replaceRequired(path, /^  "version": "([^"]+)"/m, version)
+  json.version = version
+  return json
 })
 
 syncText('src-tauri/Cargo.toml', (text, path) => {
@@ -81,7 +82,8 @@ function syncJsonVersion(relativePath, update) {
   const path = join(rootDir, relativePath)
   const text = readFileSync(path, 'utf8')
   const json = JSON.parse(text)
-  const updated = update(json, relativePath)
+  const updatedJson = update(json, relativePath)
+  const updated = `${JSON.stringify(updatedJson, null, 2)}\n`
 
   if (!checkOnly && updated !== text) {
     writeFileSync(path, updated)
@@ -96,25 +98,6 @@ function syncText(relativePath, update) {
   if (!checkOnly && updated !== text) {
     writeFileSync(path, updated)
   }
-}
-
-function replaceRequired(relativePath, pattern, replacement, inputText) {
-  const path = join(rootDir, relativePath)
-  const text = inputText ?? readFileSync(path, 'utf8')
-
-  if (!pattern.test(text)) {
-    throw new Error(`Could not find version field in ${relativePath}`)
-  }
-
-  return text.replace(pattern, (...args) => {
-    const groups = args.slice(1, -2)
-
-    if (groups.length === 1) {
-      return args[0].replace(groups[0], replacement)
-    }
-
-    return `${groups[0]}${replacement}${groups[2]}`
-  })
 }
 
 function recordMismatch(path, key, current, expected) {

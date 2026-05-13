@@ -13,7 +13,7 @@
     "tauri": "tauri",
     "tauri:compile": "npm run version:check && tauri build --no-bundle",
     "release:copy": "powershell -ExecutionPolicy Bypass -File scripts/copy-release.ps1",
-    "tauri:build": "npm run tauri:compile && npm run release:copy",
+    "tauri:build": "npm run release:copy",
     "dist": "npm run tauri:build"
   },
   "dependencies": {
