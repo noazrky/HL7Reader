@@ -14,7 +14,11 @@ function ruleFor(selector: string): string {
 }
 
 function rootVariable(name: string): string {
-  const match = ruleFor(':root').match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`))
+  return cssVariable(ruleFor(':root'), name)
+}
+
+function cssVariable(rule: string, name: string): string {
+  const match = rule.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`))
 
   return match?.[1] ?? ''
 }
@@ -101,6 +105,18 @@ describe('app layout', () => {
     expect(styles).toContain('--bg: #f4f6f8')
   })
 
+  it('uses readable parsed value text in light mode', () => {
+    const lightRootRule = ruleFor(':root[data-theme="light"]')
+    const valueRule = ruleFor('.value')
+    const valueInk = cssVariable(lightRootRule, '--value-ink')
+    const surface = cssVariable(lightRootRule, '--surface')
+    const surfaceTint = cssVariable(lightRootRule, '--surface-tint')
+
+    expect(valueRule).toContain('color: var(--value-ink)')
+    expect(contrastRatio(valueInk, surface)).toBeGreaterThanOrEqual(7)
+    expect(contrastRatio(valueInk, surfaceTint)).toBeGreaterThanOrEqual(7)
+  })
+
   it('reserves a disclosure column so expandable and flat parsed rows align', () => {
     const rowRule = ruleFor('.row')
     const disclosurePlaceholderRule = ruleFor('.row::before')
@@ -130,7 +146,7 @@ describe('app layout', () => {
     expect(actionsRule).toContain('flex: 0 0 auto')
   })
 
-  it('lets the pasted message box resize horizontally and highlights wrapped logical lines', () => {
+  it('keeps pasted message resizing vertical-only and highlights wrapped logical lines', () => {
     const textareaRule = ruleFor('textarea')
     const highlightRule = ruleFor('.message-highlights')
     const wrappedLineRule = ruleFor('.message-line.is-wrapped')
@@ -141,7 +157,8 @@ describe('app layout', () => {
     expect(main).toContain('Lines are wrapped')
     expect(main).toContain('markWrappedMessageLines')
     expect(main).toContain('setWrappedLineWarning')
-    expect(textareaRule).toContain('resize: both')
+    expect(textareaRule).toContain('resize: vertical')
+    expect(textareaRule).not.toContain('resize: both')
     expect(textareaRule).toContain('overflow: auto')
     expect(highlightRule).toContain('pointer-events: none')
     expect(highlightRule).toContain('white-space: pre-wrap')
@@ -158,9 +175,12 @@ describe('app layout', () => {
     expect(main).toContain('id="deidentify-summary"')
     expect(main).toContain('id="deidentify-highlighted-output"')
     expect(main).toContain('Copy output')
-    expect(main).toContain('Use as input')
+    expect(main).not.toContain('Use as input')
+    expect(main).not.toContain('deidentifyUse')
+    expect(main).not.toContain('deidentify-use')
     expect(main).toContain('Hide synthetic message')
     expect(main).toContain('updateDeidentifyGenerateButton')
+    expect(main).toContain('elements.deidentifyGenerate.hidden = !hasMessageText')
     expect(main).not.toContain('Hide output')
     expect(main).not.toContain('deidentifyHide')
     expect(main).toContain('renderDeidentifiedOutput')

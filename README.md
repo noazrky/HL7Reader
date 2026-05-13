@@ -10,11 +10,9 @@ The app does not send messages to a server. Parsing happens locally in the deskt
 - Keeps the pasted message visible while you scroll through the parsed structure below it.
 - Detects the active field, component, repetition, escape, and subcomponent delimiters from the `MSH` segment.
 - Labels known segments and fields using the bundled HL7 dictionary data.
-- Shows field paths such as `PID-5`, `OBX-3.2`, and repeated-field paths such as `PID-3(2)`.
-- Decodes standard HL7 escape tokens for display while keeping raw parsed values intact internally.
-- Handles common line endings and ignores blank input lines.
+- Shows concise field paths and decodes standard HL7 escape tokens for display.
+- Handles common line endings, blank input, and optional empty-field display.
 - Warns when a message does not start with a valid `MSH` segment, then continues parsing with default HL7 delimiters.
-- Supports optional display of empty fields.
 
 The main workflow is intentionally simple: paste a message into the text area, then expand the parsed structure below it.
 
@@ -26,9 +24,9 @@ Unknown custom `Z` segments are still displayed deterministically as custom segm
 
 ## Current Implementation
 
-The current application is version `2.1.0` and is implemented as a Tauri v2 desktop app with a Vite and TypeScript frontend.
+The current application version is read from the root `VERSION` file. The workspace root is the active Tauri v2 desktop app, built with a Vite and TypeScript frontend.
 
-The previous Electron implementation is kept under `archive/electron-v1` for historical reference. The workspace root is the active Tauri implementation.
+The previous Electron source archive has been removed from the working tree. Historical release context lives in `BUILD_HISTORY.md`, `CHANGELOG.md`, and any retained versioned EXE artifacts in `release/`.
 
 ## Requirements
 
@@ -73,23 +71,40 @@ Compile the Tauri app and copy the versioned EXE into the root `release` folder:
 npm run tauri:build
 ```
 
-Build the full release target through the project alias:
+`npm run dist` is the release-build alias:
 
 ```powershell
 npm run dist
 ```
+
+For a version change, edit only `VERSION`, then run:
+
+```powershell
+npm run version:sync
+npm run version:check
+npm test
+npm run build
+npm run tauri:build
+```
+
+`npm test`, `npm run build`, and the Tauri compile step all enforce `version:check`, so stale generated package, Cargo, or Tauri metadata fails before a release artifact is copied.
 
 ## Project Layout
 
 - `src/main.ts` - desktop UI and renderer behavior.
 - `src/shared/hl7Parser.ts` - HL7 parsing, delimiter detection, path generation, and escape decoding.
 - `src/shared/hl7Dictionaries.ts` - segment, field, and component label data.
-- `tests/hl7Parser.test.ts` - parser regression coverage.
+- `src/shared/hl7Deidentifier.ts` - local HL7 de-identification helpers.
+- `src/shared/releaseNotes.ts` - About-screen release history.
+- `src/styles/` - app and About-screen styling.
+- `tests/` - parser, de-identification, and UI layout regression coverage.
 - `src-tauri/` - Tauri application shell and Windows build configuration.
+- `scripts/` - version sync and release-copy automation.
 - `release/` - versioned Windows EXE artifacts.
-- `archive/electron-v1/` - archived Electron v1 implementation.
+- `VERSION` - manually edited source of truth for the active app version.
 - `CHANGELOG.md` - release history.
 - `VERSIONING.md` - versioning and release artifact policy.
+- `BUILD_HISTORY.md` - build and release troubleshooting notes.
 
 ## Limitations
 

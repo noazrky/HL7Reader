@@ -1,6 +1,6 @@
 {
   "name": "hl7-reader",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Tauri desktop implementation of HL7 Reader",
   "private": true,
   "type": "module",
