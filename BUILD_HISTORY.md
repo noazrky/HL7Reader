@@ -9,11 +9,11 @@ For release notes only, see `CHANGELOG.md`. For the version numbering policy, se
 HL7 Reader has two implementation generations:
 
 - `2.x`: the current Tauri desktop app at the repository root.
-- `0.x` and `1.x`: the archived Electron app in `archive/electron-v1`.
+- `0.x` and `1.x`: the legacy Electron app, retained only as historical release notes and versioned EXE artifacts.
 
 The current app uses a Vite and TypeScript frontend with a small Tauri Rust shell. The frontend parses and displays HL7 v2 messages. Tauri provides the desktop window, native menu, About window, zoom controls, and the direct Windows executable.
 
-The archived Electron app is kept so older releases can still be inspected, rebuilt, or compared when troubleshooting regressions.
+The legacy Electron source archive has been removed from the working tree now that the Tauri app is stable. Older release behavior can still be compared through the versioned EXE artifacts in `release/`.
 
 ## Current Tauri Build Pipeline
 
@@ -27,48 +27,26 @@ npm run tauri:build
 
 What those commands do:
 
-- `npm test` runs the Vitest parser regression suite in `tests/`.
-- `npm run build` runs `tsc --noEmit` and then Vite. Vite builds both `index.html` and `about.html` into `dist/`.
+- `npm test` first checks that generated version metadata matches `VERSION`, then runs the Vitest parser regression suite in `tests/`.
+- `npm run build` first checks that generated version metadata matches `VERSION`, then runs `tsc --noEmit` and Vite. Vite builds both `index.html` and `about.html` into `dist/`.
 - `npm run tauri:build` runs `npm run tauri:compile`, then `scripts/copy-release.ps1`.
-- `npm run tauri:compile` runs `tauri build --no-bundle`, producing `src-tauri/target/release/hl7-reader-tauri.exe`.
-- `scripts/copy-release.ps1` reads the app version from `package.json`, then copies the compiled EXE to `release/HL7 Reader <version>.exe`.
+- `npm run tauri:compile` first checks that generated version metadata matches `VERSION`, then runs `tauri build --no-bundle`, producing `src-tauri/target/release/hl7-reader-tauri.exe`.
+- `scripts/copy-release.ps1` reads the app version from `VERSION`, verifies the generated metadata matches it, then copies the compiled EXE to `release/HL7 Reader <version>.exe`.
 
-The Tauri EXE is a direct-launch Windows executable, not an installer. It expects the Microsoft Edge WebView2 Runtime to already exist on the target machine.
+The Tauri EXE is a direct-launch Windows executable, not an installer. It expects the Microsoft Edge WebView2 Runtime to already exist on the target machine. The checked-in Tauri config keeps bundling inactive and does not define NSIS or WebView2 bootstrapper settings; `scripts/copy-release.ps1` rejects a default release copy if bundling is re-enabled.
 
-## Archived Electron Build Pipeline
+## Version Source Of Truth
 
-Run these commands from `archive/electron-v1`:
+For a normal Tauri release, `VERSION` is the only manually edited source of truth. Edit it, then run:
 
 ```powershell
-npm test
-npm run build
-npm run dist
+npm run version:sync
+npm run version:check
 ```
 
-What those commands do:
+The sync script updates `package.json`, the root package entries in `package-lock.json`, `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml`, and the `hl7-reader-tauri` package entry in `src-tauri/Cargo.lock`. The About screen reads the same version through the Vite build. These generated metadata fields should not be edited by hand for a normal release bump.
 
-- `npm test` runs the archived Vitest parser tests in `archive/electron-v1/tests/`.
-- `npm run build` runs TypeScript checks and `electron-vite build`.
-- `npm run dist` runs the build and then `electron-builder --win portable`.
-- Electron Builder produces a Windows portable EXE using the `build` settings in `archive/electron-v1/package.json`.
-
-When rebuilding from the archive folder, Electron Builder writes to `archive/electron-v1/release/`. The versioned EXEs that were kept for normal comparison and troubleshooting live in the root `release/` folder. The Electron EXEs are much larger than the Tauri EXEs because they include the Electron runtime.
-
-## Version Surfaces To Update
-
-For a normal Tauri release, keep these files in sync:
-
-- `package.json`
-- `package-lock.json`, root package version entries near the top
-- `src-tauri/tauri.conf.json`
-- `src-tauri/Cargo.toml`
-- `src-tauri/Cargo.lock`, the `hl7-reader-tauri` package entry
-- `src/about.ts`
-- `src/shared/releaseNotes.ts`
-- `CHANGELOG.md`
-- `VERSIONING.md`
-
-For archived Electron work, use the same idea inside `archive/electron-v1`, especially `archive/electron-v1/package.json` and `archive/electron-v1/src/shared/releaseNotes.ts`.
+Release notes still need separate curated updates in `src/shared/releaseNotes.ts` and `CHANGELOG.md`. Those files are historical release records, not the current-version source of truth.
 
 ## Version Build History
 
@@ -82,14 +60,9 @@ What changed:
 - Added message parsing for segments, fields, components, subcomponents, metadata, and warnings.
 - Added the first paste-and-inspect interface.
 
-Build steps used:
+Build source:
 
-```powershell
-cd archive\electron-v1
-npm test
-npm run build
-npm run dist
-```
+The Electron source used for this release is no longer kept in the working tree.
 
 Archived artifact:
 
@@ -99,7 +72,7 @@ release/HL7 Reader 0.1.0.exe
 
 Troubleshooting notes:
 
-- If parsing output differs from later versions, compare against `archive/electron-v1/src/shared/hl7Parser.ts` and the release notes for `0.1.1`.
+- If parsing output differs from later versions, compare the archived EXE behavior against the current parser regression suite.
 - This version predates the broader parser regression coverage added later.
 
 ### 0.1.1
@@ -111,14 +84,9 @@ What changed:
 - Expanded parser labels for additional ADT, order, observation, procedure, role, and insurance segments.
 - Added tests for repeated fields, nested components, custom delimiters, malformed input, and blank input.
 
-Build steps used:
+Build source:
 
-```powershell
-cd archive\electron-v1
-npm test
-npm run build
-npm run dist
-```
+The Electron source used for this release is no longer kept in the working tree.
 
 Archived artifact:
 
@@ -128,7 +96,7 @@ release/HL7 Reader 0.1.1.exe
 
 Troubleshooting notes:
 
-- If a repeated field or nested component renders incorrectly, start by running the archived parser tests.
+- If a repeated field or nested component renders incorrectly, start with the current parser regression tests.
 - Check delimiter handling before changing UI rendering code.
 
 ### 0.2.0
@@ -141,14 +109,9 @@ What changed:
 - Added the HL7 Reader icon mark to the app header, Help dialog, and packaged Windows app.
 - Limited packaged Electron locale files to en-US, en-GB, and es.
 
-Build steps used:
+Build source:
 
-```powershell
-cd archive\electron-v1
-npm test
-npm run build
-npm run dist
-```
+The Electron source used for this release is no longer kept in the working tree.
 
 Archived artifact:
 
@@ -158,8 +121,8 @@ release/HL7 Reader 0.2.0.exe
 
 Troubleshooting notes:
 
-- If the icon is missing from the packaged app, check `archive/electron-v1/build/icon.ico` and the `build.win.icon` setting in `archive/electron-v1/package.json`.
-- If the Help menu is missing, inspect the Electron main-process menu setup.
+- If an old EXE is missing its icon, compare against nearby versioned EXE artifacts.
+- If the Help menu is missing, compare the old EXE behavior against the current About and menu implementation.
 
 ### 0.2.1
 
@@ -171,14 +134,9 @@ What changed:
 - Added Ctrl+Shift+M, F1, and a hamburger button for menu/About access.
 - Updated the app icon to a star-only mark and reused it in the header, About dialog, and Windows package.
 
-Build steps used:
+Build source:
 
-```powershell
-cd archive\electron-v1
-npm test
-npm run build
-npm run dist
-```
+The Electron source used for this release is no longer kept in the working tree.
 
 Archived artifact:
 
@@ -201,14 +159,9 @@ What changed:
 - Added `CHANGELOG.md`.
 - Reworked About release history so each version appears in a separate dropdown.
 
-Build steps used:
+Build source:
 
-```powershell
-cd archive\electron-v1
-npm test
-npm run build
-npm run dist
-```
+The Electron source used for this release is no longer kept in the working tree.
 
 Archived artifact:
 
@@ -218,7 +171,7 @@ release/HL7 Reader 0.2.2.exe
 
 Troubleshooting notes:
 
-- If release notes are wrong in the app, compare `CHANGELOG.md` with `archive/electron-v1/src/shared/releaseNotes.ts`.
+- If release notes are wrong in the app, compare `CHANGELOG.md` with `src/shared/releaseNotes.ts`.
 - About-window issues usually come from release-note data shape mismatches or renderer markup changes.
 
 ### 1.0.0
@@ -232,14 +185,9 @@ What changed:
 - Hardened Electron window defaults, removed packaged reload/devtools menu entries, and enabled stricter unused-code checks.
 - Reduced packaged Windows locales to en-US and enabled maximum package compression.
 
-Build steps used:
+Build source:
 
-```powershell
-cd archive\electron-v1
-npm test
-npm run build
-npm run dist
-```
+The Electron source used for this release is no longer kept in the working tree.
 
 Archived artifact:
 
@@ -250,8 +198,8 @@ release/HL7 Reader 1.0.0.exe
 Troubleshooting notes:
 
 - If HL7 escape text displays incorrectly, test `decodeHl7Escapes` before changing the UI.
-- If the EXE grows unexpectedly, check Electron Builder locale, compression, and packaged file settings in `archive/electron-v1/package.json`.
-- If packaged devtools or reload shortcuts appear, inspect the Electron window and menu hardening.
+- If an old EXE behaves unexpectedly, compare it against the nearest earlier and later versioned EXE artifacts.
+- If packaged devtools or reload shortcuts appear in a legacy EXE, treat that as historical Electron behavior rather than current Tauri behavior.
 
 ### 2.0.0
 
@@ -404,17 +352,18 @@ Get-Item -LiteralPath "release\HL7 Reader <version>.exe"
 
 ### Release EXE is missing or has the wrong version
 
-- Confirm `package.json` has the intended version.
-- Confirm `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json` match it.
+- Confirm `VERSION` has the intended version.
+- Run `npm run version:check`; if it fails, run `npm run version:sync` and check again.
+- Confirm `src-tauri/tauri.conf.json` has `"bundle": { "active": false, ... }`; the default release flow is the no-installer EXE path.
 - Run `npm run tauri:compile` before `npm run release:copy`, or just run `npm run tauri:build`.
-- Check `scripts/copy-release.ps1`; it names the output from `package.json` and `tauri.conf.json`.
+- Check `scripts/copy-release.ps1`; it names the output from `VERSION` and the Tauri product name.
 
 ### App version in About is wrong
 
-- Update `src/about.ts`.
-- Update the top entry in `src/shared/releaseNotes.ts`.
-- Update `CHANGELOG.md`.
+- Confirm `VERSION` has the intended current version.
+- Run `npm run version:check`; if it fails, run `npm run version:sync` and check again.
 - Rebuild with `npm run build` so the About page is regenerated.
+- If the release history is wrong, update the top entry in `src/shared/releaseNotes.ts` and `CHANGELOG.md`.
 
 ### App works in development but packaged EXE is blank
 

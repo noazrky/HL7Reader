@@ -2,6 +2,19 @@
 
 All project changes are tracked using the `Major.Minor.Change` version format described in `VERSIONING.md`.
 
+## Unreleased
+
+- Added a root `VERSION` file as the source of truth for the active Tauri app version.
+- Added version sync/check tooling so package, Cargo, Tauri, release artifact, and About-screen version metadata derive from `VERSION` or fail the build when stale.
+- Updated versioning and build documentation to describe the new source-of-truth flow.
+- Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
+
+## 2.0.4 - 2026-05-13 00:00:00
+
+- Added a Windows startup safeguard that checks for the Microsoft Edge WebView2 Runtime before opening the Tauri app.
+- Shows a clear native error message with the WebView2 download link if the direct EXE cannot start because the runtime is missing.
+- Added Rust regression coverage for WebView2 startup error detection and fallback message copy.
+
 ## 2.0.3 - 2026-05-12 16:43:44
 
 - Hid the native File/Edit/View/Help menu bar from the Help window while leaving the main window menu toggle unchanged.
