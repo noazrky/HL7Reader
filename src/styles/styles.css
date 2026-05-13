@@ -321,15 +321,16 @@ details > summary::-webkit-details-marker {
 
 .row {
   display: grid;
-  grid-template-columns: minmax(84px, 0.5fr) minmax(180px, 0.9fr) minmax(0, 2fr);
+  grid-template-columns: 18px minmax(88px, 0.45fr) minmax(190px, 0.9fr) minmax(0, 2fr);
   gap: 12px;
   align-items: start;
   min-height: 38px;
   padding: 9px 14px;
 }
 
-summary .row {
-  grid-template-columns: 18px minmax(88px, 0.45fr) minmax(190px, 0.9fr) minmax(0, 2fr);
+.row::before {
+  content: "";
+  width: 14px;
 }
 
 details > summary .row::before {
@@ -437,18 +438,17 @@ details[open] > summary .row::before {
     height: clamp(140px, 30vh, 220px);
   }
 
-  .row,
-  summary .row {
+  .row {
     display: grid;
-    grid-template-columns: minmax(72px, 0.6fr) minmax(0, 1fr);
+    grid-template-columns: 16px minmax(72px, 0.6fr) minmax(0, 1fr);
     gap: 4px 10px;
   }
 
   details > summary .row::before {
-    display: none;
+    width: 12px;
   }
 
   .value {
-    grid-column: 1 / -1;
+    grid-column: 2 / -1;
   }
 }

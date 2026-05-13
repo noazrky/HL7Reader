@@ -9,6 +9,12 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 2.1.2 - 2026-05-13 06:44:36
+
+- Kept MSH-2 Encoding Characters as a single non-expandable value instead of splitting its structural delimiters into subcomponents.
+- Aligned parsed tree rows by reserving consistent disclosure-arrow space for expandable and flat rows.
+- Added parser and layout regression coverage for the MSH-2 and tree alignment behavior.
+
 ## 2.1.1 - 2026-05-13 06:27:48
 
 - Moved the Show empty segments toggle into the Parsed structure header so the display option sits with the parsed output it controls.

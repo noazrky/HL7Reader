@@ -90,4 +90,15 @@ describe('app layout', () => {
     expect(styles).toContain(':root[data-theme="light"]')
     expect(styles).toContain('--bg: #f4f6f8')
   })
+
+  it('reserves a disclosure column so expandable and flat parsed rows align', () => {
+    const rowRule = ruleFor('.row')
+    const disclosurePlaceholderRule = ruleFor('.row::before')
+    const disclosureRule = ruleFor('details > summary .row::before')
+
+    expect(rowRule).toContain('grid-template-columns: 18px')
+    expect(styles).not.toMatch(/summary\s+\.row\s*\{[^}]*grid-template-columns/)
+    expect(disclosurePlaceholderRule).toContain('content: ""')
+    expect(disclosureRule).toContain('content: ">"')
+  })
 })

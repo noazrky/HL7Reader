@@ -195,13 +195,17 @@ function buildField(
   delimiters: Hl7Delimiters
 ): ParsedField {
   const definition = getFieldDefinition(segmentId, position)
+  const path = `${segmentId}-${position}`
+  const shouldParseNestedValues = !(segmentId === 'MSH' && position === 2)
 
   return {
-    path: `${segmentId}-${position}`,
+    path,
     name: definition.name,
     datatype: definition.datatype,
     rawValue,
-    repetitions: parseRepetitions(`${segmentId}-${position}`, rawValue, definition.datatype, delimiters)
+    repetitions: shouldParseNestedValues
+      ? parseRepetitions(path, rawValue, definition.datatype, delimiters)
+      : []
   }
 }
 

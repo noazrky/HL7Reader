@@ -21,6 +21,12 @@ describe('parseHl7', () => {
       name: 'Field Separator',
       rawValue: '|'
     })
+    expect(parsed.segments[0].fields[1]).toMatchObject({
+      path: 'MSH-2',
+      name: 'Encoding Characters',
+      rawValue: '^~\\&',
+      repetitions: []
+    })
     expect(parsed.segments[2].fields.find((field) => field.path === 'PID-5')).toMatchObject({
       name: 'Patient Name',
       datatype: 'XPN',

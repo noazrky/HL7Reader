@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.1.2',
+    date: '2026-05-13',
+    changes: [
+      'Kept MSH-2 Encoding Characters as a single non-expandable value instead of splitting its structural delimiters into subcomponents.',
+      'Aligned parsed tree rows by reserving consistent disclosure-arrow space for expandable and flat rows.',
+      'Added parser and layout regression coverage for the MSH-2 and tree alignment behavior.'
+    ]
+  },
+  {
     version: '2.1.1',
     date: '2026-05-13',
     changes: [

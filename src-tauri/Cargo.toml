@@ -1,6 +1,6 @@
 [package]
 name = "hl7-reader-tauri"
-version = "2.1.1"
+version = "2.1.2"
 description = "Tauri desktop implementation of HL7 Reader"
 authors = ["local"]
 edition = "2021"
