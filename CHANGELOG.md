@@ -9,6 +9,12 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 2.1.1 - 2026-05-13 06:27:48
+
+- Moved the Show empty segments toggle into the Parsed structure header so the display option sits with the parsed output it controls.
+- Kept the parsed header layout stable across desktop and narrow window widths.
+- Verified the parser tests and frontend production build for the layout change.
+
 ## 2.1.0 - 2026-05-13 00:05:00
 
 - Refreshed the main HL7 Reader window with a cleaner light interface, tighter parser rows, and clearer message/parse status summaries.

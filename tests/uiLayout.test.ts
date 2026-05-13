@@ -84,4 +84,10 @@ describe('app layout', () => {
     expect(contrastRatio(muted, surface)).toBeGreaterThanOrEqual(4.5)
     expect(contrastRatio(accentStrong, surface)).toBeGreaterThanOrEqual(4.5)
   })
+
+  it('can apply the Windows app theme at startup', () => {
+    expect(main).toContain('initializeSystemTheme')
+    expect(styles).toContain(':root[data-theme="light"]')
+    expect(styles).toContain('--bg: #f4f6f8')
+  })
 })

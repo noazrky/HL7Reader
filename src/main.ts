@@ -9,6 +9,7 @@ import {
   type ParsedSegment
 } from '@shared/hl7Parser'
 import { appIconSvg } from '@shared/appIcon'
+import { initializeSystemTheme } from '@shared/systemTheme'
 import './styles/styles.css'
 
 const sampleMessage = [
@@ -26,6 +27,8 @@ type RendererState = {
 
 const app = document.querySelector<HTMLDivElement>('#app')
 
+void initializeSystemTheme()
+
 if (!app) {
   throw new Error('Missing app root')
 }
@@ -35,13 +38,8 @@ app.innerHTML = `
     <header class="topbar">
       <div class="brand-block">
         <h1><span class="app-mark" aria-hidden="true">${appIconSvg}</span>HL7 Reader</h1>
-        <p>Local HL7 v2 message inspection</p>
       </div>
       <div class="topbar-actions">
-        <label class="toggle">
-          <input id="show-empty" type="checkbox" />
-          <span>Show empty fields</span>
-        </label>
         <button class="icon-button" id="menu-toggle" type="button" aria-label="Toggle menu bar" title="Toggle menu bar">
           <span></span>
           <span></span>
@@ -67,6 +65,10 @@ app.innerHTML = `
             <h2>Parsed structure</h2>
             <p id="parse-summary">Paste a message to begin</p>
           </div>
+          <label class="toggle">
+            <input id="show-empty" type="checkbox" />
+            <span>Show empty segments</span>
+          </label>
         </div>
         <section class="warnings" id="warnings"></section>
         <section class="tree" id="tree"></section>

@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.1.1',
+    date: '2026-05-13',
+    changes: [
+      'Moved the Show empty segments toggle into the Parsed structure header so the display option sits with the parsed output it controls.',
+      'Kept the parsed header layout stable across desktop and narrow window widths.',
+      'Verified the parser tests and frontend production build for the layout change.'
+    ]
+  },
+  {
     version: '2.1.0',
     date: '2026-05-13',
     changes: [
