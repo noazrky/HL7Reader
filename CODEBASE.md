@@ -24,6 +24,7 @@ npm run tauri:build
 ```
 
 `npm run tauri:build` compiles the direct Tauri EXE without an installer bundle and copies the versioned EXE into the root `release` folder for easy access. `src-tauri/tauri.conf.json` keeps Tauri bundling inactive so the checked-in default cannot produce an NSIS or WebView2 bootstrapper installer. If you only need the raw Tauri compile without publishing to `release`, run `npm run tauri:compile`.
+When application behavior, build requirements, supported HL7 coverage, or release packaging changes, update `README.md` as part of the same build/release work so the public project documentation stays accurate.
 
 Before versioned builds, edit only `VERSION`, then run `npm run version:sync` and `npm run version:check`. The normal test, build, and Tauri compile scripts already run the version check so stale generated metadata fails early.
 
