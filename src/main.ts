@@ -8,7 +8,6 @@ import {
   type ParsedRepetition,
   type ParsedSegment
 } from '@shared/hl7Parser'
-import { appIconSvg } from '@shared/appIcon'
 import { initializeSystemTheme } from '@shared/systemTheme'
 import './styles/styles.css'
 
@@ -37,7 +36,7 @@ app.innerHTML = `
   <section class="shell">
     <header class="topbar">
       <div class="brand-block">
-        <h1><span class="app-mark" aria-hidden="true">${appIconSvg}</span>HL7 Reader</h1>
+        <h1>HL7 Reader</h1>
       </div>
       <div class="topbar-actions">
         <button class="icon-button" id="menu-toggle" type="button" aria-label="Toggle menu bar" title="Toggle menu bar">
@@ -56,7 +55,10 @@ app.innerHTML = `
             <p id="message-summary">Waiting for pasted content</p>
           </div>
         </div>
-        <textarea id="message-input" spellcheck="false"></textarea>
+        <div class="message-editor" id="message-editor">
+          <div class="message-highlights" id="message-highlights" aria-hidden="true"></div>
+          <textarea id="message-input" spellcheck="false"></textarea>
+        </div>
       </section>
 
       <section class="results-panel" aria-label="Parsed HL7 output">
@@ -78,6 +80,8 @@ app.innerHTML = `
 `
 
 const input = document.querySelector<HTMLTextAreaElement>('#message-input')
+const messageEditor = document.querySelector<HTMLElement>('#message-editor')
+const messageHighlights = document.querySelector<HTMLElement>('#message-highlights')
 const showEmpty = document.querySelector<HTMLInputElement>('#show-empty')
 const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle')
 const messageSummary = document.querySelector<HTMLElement>('#message-summary')
@@ -85,12 +89,14 @@ const parseSummary = document.querySelector<HTMLElement>('#parse-summary')
 const warnings = document.querySelector<HTMLElement>('#warnings')
 const tree = document.querySelector<HTMLElement>('#tree')
 
-if (!input || !showEmpty || !menuToggle || !messageSummary || !parseSummary || !warnings || !tree) {
+if (!input || !messageEditor || !messageHighlights || !showEmpty || !menuToggle || !messageSummary || !parseSummary || !warnings || !tree) {
   throw new Error('Missing renderer elements')
 }
 
 const elements = {
   input,
+  messageEditor,
+  messageHighlights,
   showEmpty,
   menuToggle,
   messageSummary,
@@ -104,12 +110,21 @@ const state: RendererState = {
   showEmptyFields: false
 }
 
+let messageHighlightFrame = 0
+
 elements.input.placeholder = sampleMessage
 
 elements.input.addEventListener('input', () => {
   state.parsed = parseHl7(elements.input.value)
   render()
 })
+
+elements.input.addEventListener('scroll', syncMessageHighlightScroll)
+
+const messageInputResizeObserver = new ResizeObserver(() => {
+  scheduleMessageHighlightMeasure()
+})
+messageInputResizeObserver.observe(elements.input)
 
 elements.showEmpty.addEventListener('change', () => {
   state.showEmptyFields = elements.showEmpty.checked
@@ -136,9 +151,73 @@ document.addEventListener('keydown', (event) => {
 render()
 
 function render(): void {
+  renderMessageHighlights()
   renderSummaries(state.parsed)
   renderWarnings(state.parsed)
   renderTree(state.parsed)
+}
+
+function renderMessageHighlights(): void {
+  elements.messageHighlights.replaceChildren()
+
+  if (elements.input.value.length === 0) {
+    scheduleMessageHighlightMeasure()
+    return
+  }
+
+  const lines = elements.input.value.split(/\r\n|\r|\n/)
+
+  for (const [index, line] of lines.entries()) {
+    const lineEl = document.createElement('span')
+    lineEl.className = 'message-line'
+    lineEl.textContent = line.length > 0 ? line : '\u200B'
+    elements.messageHighlights.append(lineEl)
+
+    if (index < lines.length - 1) {
+      elements.messageHighlights.append(document.createElement('br'))
+    }
+  }
+
+  scheduleMessageHighlightMeasure()
+}
+
+function scheduleMessageHighlightMeasure(): void {
+  if (messageHighlightFrame !== 0) {
+    return
+  }
+
+  messageHighlightFrame = window.requestAnimationFrame(() => {
+    messageHighlightFrame = 0
+    syncMessageHighlightSize()
+    markWrappedMessageLines()
+    syncMessageHighlightScroll()
+  })
+}
+
+function syncMessageHighlightSize(): void {
+  const styles = getComputedStyle(elements.input)
+  const borderX = numericStyleValue(styles.borderLeftWidth) + numericStyleValue(styles.borderRightWidth)
+  const borderY = numericStyleValue(styles.borderTopWidth) + numericStyleValue(styles.borderBottomWidth)
+
+  elements.messageHighlights.style.width = `${elements.input.clientWidth + borderX}px`
+  elements.messageHighlights.style.height = `${elements.input.clientHeight + borderY}px`
+}
+
+function syncMessageHighlightScroll(): void {
+  elements.messageHighlights.scrollLeft = elements.input.scrollLeft
+  elements.messageHighlights.scrollTop = elements.input.scrollTop
+}
+
+function markWrappedMessageLines(): void {
+  for (const line of elements.messageHighlights.querySelectorAll<HTMLElement>('.message-line')) {
+    line.classList.toggle('is-wrapped', line.getClientRects().length > 1)
+  }
+}
+
+function numericStyleValue(value: string): number {
+  const numericValue = Number.parseFloat(value)
+
+  return Number.isFinite(numericValue) ? numericValue : 0
 }
 
 function renderSummaries(parsed: ParsedMessage): void {

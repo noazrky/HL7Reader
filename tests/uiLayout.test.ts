@@ -101,4 +101,37 @@ describe('app layout', () => {
     expect(disclosurePlaceholderRule).toContain('content: ""')
     expect(disclosureRule).toContain('content: ">"')
   })
+
+  it('keeps the app title and menu button on one row without an in-window icon', () => {
+    const topbarRule = ruleFor('.topbar')
+    const brandRule = ruleFor('.brand-block')
+    const titleRule = ruleFor('h1')
+    const actionsRule = ruleFor('.topbar-actions')
+
+    expect(main).toContain('<h1>HL7 Reader</h1>')
+    expect(main).not.toContain('appIconSvg')
+    expect(main).not.toContain('class="app-mark"')
+    expect(styles).not.toContain('.app-mark')
+    expect(topbarRule).toContain('display: flex')
+    expect(topbarRule).not.toContain('flex-direction: column')
+    expect(brandRule).toContain('flex: 1 1 auto')
+    expect(titleRule).toContain('white-space: nowrap')
+    expect(titleRule).toContain('text-overflow: ellipsis')
+    expect(actionsRule).toContain('flex: 0 0 auto')
+  })
+
+  it('lets the pasted message box resize horizontally and highlights wrapped logical lines', () => {
+    const textareaRule = ruleFor('textarea')
+    const highlightRule = ruleFor('.message-highlights')
+    const wrappedLineRule = ruleFor('.message-line.is-wrapped')
+
+    expect(main).toContain('id="message-highlights"')
+    expect(main).toContain('markWrappedMessageLines')
+    expect(textareaRule).toContain('resize: both')
+    expect(textareaRule).toContain('overflow: auto')
+    expect(highlightRule).toContain('pointer-events: none')
+    expect(highlightRule).toContain('white-space: pre-wrap')
+    expect(wrappedLineRule).toContain('background:')
+    expect(wrappedLineRule).toContain('box-decoration-break: clone')
+  })
 })

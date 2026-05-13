@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.1.3',
+    date: '2026-05-13',
+    changes: [
+      'Kept the HL7 Reader title and menu button on one line when the window is narrowed.',
+      'Removed the in-window app icon from the main header while leaving the native window icon and About icon intact.',
+      'Added layout regression coverage for the single-row header and verified the frontend build.'
+    ]
+  },
+  {
     version: '2.1.2',
     date: '2026-05-13',
     changes: [

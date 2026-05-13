@@ -9,6 +9,12 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 2.1.3 - 2026-05-13 07:11:20
+
+- Kept the HL7 Reader title and menu button on one line when the window is narrowed.
+- Removed the in-window app icon from the main header while leaving the native window icon and About icon intact.
+- Added layout regression coverage for the single-row header and verified the frontend build.
+
 ## 2.1.2 - 2026-05-13 06:44:36
 
 - Kept MSH-2 Encoding Characters as a single non-expandable value instead of splitting its structural delimiters into subcomponents.
