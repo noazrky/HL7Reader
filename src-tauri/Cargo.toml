@@ -1,6 +1,6 @@
 [package]
 name = "hl7-reader-tauri"
-version = "2.0.3"
+version = "2.0.4"
 description = "Tauri desktop implementation of HL7 Reader"
 authors = ["local"]
 edition = "2021"
@@ -17,6 +17,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+windows-sys = { version = "0.61", features = ["Win32_UI_WindowsAndMessaging"] }
 
 [profile.release]
 codegen-units = 1

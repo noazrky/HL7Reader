@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::{process, sync::Mutex};
 
 use tauri::{
     menu::{MenuBuilder, MenuItem, SubmenuBuilder},
@@ -33,6 +33,18 @@ fn show_about(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 pub fn run() {
+    if let Err(error) = ensure_webview_runtime() {
+        report_startup_failure(&startup_failure_message(&error));
+        process::exit(1);
+    }
+
+    if let Err(error) = run_tauri_app() {
+        report_startup_failure(&startup_failure_message(&error.to_string()));
+        process::exit(1);
+    }
+}
+
+fn run_tauri_app() -> tauri::Result<()> {
     tauri::Builder::default()
         .manage(ZoomState(Mutex::new(1.0)))
         .invoke_handler(tauri::generate_handler![toggle_menu, show_about])
@@ -46,7 +58,69 @@ pub fn run() {
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("error while running HL7 Reader Tauri app");
+}
+
+fn ensure_webview_runtime() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        tauri::webview_version()
+            .map(|_| ())
+            .map_err(|error| format!("WebView2 runtime check failed: {error}"))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        Ok(())
+    }
+}
+
+fn startup_failure_message(error_message: &str) -> String {
+    if is_webview2_startup_error(error_message) {
+        format!(
+            "{APP_NAME} could not start because the Microsoft Edge WebView2 Runtime is missing or unavailable.\n\nInstall Microsoft Edge WebView2 Runtime, then reopen {APP_NAME}.\n\nDownload: https://developer.microsoft.com/microsoft-edge/webview2/\n\nTechnical details:\n{error_message}"
+        )
+    } else {
+        format!("{APP_NAME} could not start.\n\nTechnical details:\n{error_message}")
+    }
+}
+
+fn is_webview2_startup_error(error_message: &str) -> bool {
+    let normalized = error_message.to_ascii_lowercase();
+
+    normalized.contains("webview2")
+        || normalized.contains("webview runtime")
+        || normalized.contains("webviewruntime")
+}
+
+fn report_startup_failure(message: &str) {
+    #[cfg(target_os = "windows")]
+    {
+        show_windows_error_message(message);
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        eprintln!("{message}");
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn show_windows_error_message(message: &str) {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        MessageBoxW, MB_ICONERROR, MB_OK, MB_SETFOREGROUND,
+    };
+
+    let title: Vec<u16> = APP_NAME.encode_utf16().chain(Some(0)).collect();
+    let text: Vec<u16> = message.encode_utf16().chain(Some(0)).collect();
+
+    unsafe {
+        MessageBoxW(
+            std::ptr::null_mut(),
+            text.as_ptr(),
+            title.as_ptr(),
+            MB_OK | MB_ICONERROR | MB_SETFOREGROUND,
+        );
+    }
 }
 
 fn install_menu(app: &mut tauri::App) -> tauri::Result<()> {
@@ -173,4 +247,39 @@ fn open_about_window(app: &tauri::AppHandle) -> tauri::Result<()> {
 
 fn to_message(error: tauri::Error) -> String {
     error.to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn identifies_webview2_startup_errors() {
+        assert!(is_webview2_startup_error(
+            "runtime error: WebView2 error: Windows Error"
+        ));
+        assert!(is_webview2_startup_error(
+            "webview runtime is not installed"
+        ));
+        assert!(!is_webview2_startup_error("setup hook failed"));
+    }
+
+    #[test]
+    fn startup_message_explains_missing_webview2_runtime() {
+        let message = startup_failure_message("runtime error: WebView2 error: unavailable");
+
+        assert!(message.contains("Microsoft Edge WebView2 Runtime"));
+        assert!(message.contains("Install Microsoft Edge WebView2 Runtime"));
+        assert!(message.contains("Technical details:"));
+        assert!(message.contains("runtime error: WebView2 error: unavailable"));
+    }
+
+    #[test]
+    fn startup_message_keeps_generic_errors_generic() {
+        let message = startup_failure_message("setup hook failed");
+
+        assert!(message.contains("HL7 Reader could not start."));
+        assert!(!message.contains("Install Microsoft Edge WebView2 Runtime"));
+        assert!(message.contains("setup hook failed"));
+    }
 }

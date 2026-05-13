@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.0.4',
+    date: '2026-05-13',
+    changes: [
+      'Added a Windows startup safeguard that checks for the Microsoft Edge WebView2 Runtime before opening the Tauri app.',
+      'Shows a clear native error message with the WebView2 download link if the direct EXE cannot start because the runtime is missing.',
+      'Kept the default release flow aligned to the no-installer Tauri EXE by disabling installer bundling in the checked-in Tauri config.'
+    ]
+  },
+  {
     version: '2.0.3',
     date: '2026-05-12',
     changes: [
