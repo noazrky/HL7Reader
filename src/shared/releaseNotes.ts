@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '3.0.1',
+    date: '2026-05-13',
+    changes: [
+      'Limited the pasted Message box to vertical resizing so horizontal adjustment cannot break the app layout.',
+      'Darkened parsed value text in light mode for stronger readability in the parsed structure.',
+      'Hid the synthetic-message generate button until message text is present and removed the unused Use as input action from the synthetic output header.'
+    ]
+  },
+  {
     version: '3.0.0',
     date: '2026-05-13',
     changes: [

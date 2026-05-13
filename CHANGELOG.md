@@ -9,6 +9,13 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 3.0.1 - 2026-05-13 12:20:39
+
+- Limited the pasted Message box to vertical resizing so horizontal adjustment cannot break the app layout.
+- Darkened parsed value text in light mode for stronger readability in the parsed structure.
+- Hid the synthetic-message generate button until message text is present and removed the unused Use as input action from the synthetic output header.
+- Added UI regression coverage for vertical-only resizing, light-mode parsed text contrast, and synthetic-message controls.
+
 ## 3.0.0 - 2026-05-13 11:56:59
 
 - Added local-only synthetic HL7 de-identification for structured patient, guarantor, next-of-kin, and insured fields.

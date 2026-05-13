@@ -83,7 +83,6 @@ app.innerHTML = `
           </div>
           <div class="panel-actions">
             <button class="secondary-button" id="deidentify-copy" type="button">Copy output</button>
-            <button class="secondary-button" id="deidentify-use" type="button">Use as input</button>
           </div>
         </div>
         <div class="deidentify-summary" id="deidentify-summary"></div>
@@ -117,7 +116,6 @@ const deidentifyStatus = document.querySelector<HTMLElement>('#deidentify-status
 const deidentifySummary = document.querySelector<HTMLElement>('#deidentify-summary')
 const deidentifyHighlightedOutput = document.querySelector<HTMLElement>('#deidentify-highlighted-output')
 const deidentifyCopy = document.querySelector<HTMLButtonElement>('#deidentify-copy')
-const deidentifyUse = document.querySelector<HTMLButtonElement>('#deidentify-use')
 const wrapWarning = document.querySelector<HTMLElement>('#wrap-warning')
 const showEmpty = document.querySelector<HTMLInputElement>('#show-empty')
 const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle')
@@ -136,7 +134,6 @@ if (
   !deidentifySummary ||
   !deidentifyHighlightedOutput ||
   !deidentifyCopy ||
-  !deidentifyUse ||
   !wrapWarning ||
   !showEmpty ||
   !menuToggle ||
@@ -158,7 +155,6 @@ const elements = {
   deidentifySummary,
   deidentifyHighlightedOutput,
   deidentifyCopy,
-  deidentifyUse,
   wrapWarning,
   showEmpty,
   menuToggle,
@@ -197,6 +193,10 @@ elements.showEmpty.addEventListener('change', () => {
 })
 
 elements.deidentifyGenerate.addEventListener('click', () => {
+  if (elements.input.value.trim().length === 0) {
+    return
+  }
+
   if (state.deidentified) {
     state.deidentified = null
     render()
@@ -209,17 +209,6 @@ elements.deidentifyGenerate.addEventListener('click', () => {
 
 elements.deidentifyCopy.addEventListener('click', () => {
   void copyDeidentifiedOutput()
-})
-
-elements.deidentifyUse.addEventListener('click', () => {
-  if (!state.deidentified) {
-    return
-  }
-
-  elements.input.value = state.deidentified.message
-  state.parsed = parseHl7(elements.input.value)
-  state.deidentified = null
-  render()
 })
 
 elements.menuToggle.addEventListener('click', () => {
@@ -378,6 +367,9 @@ function renderDeidentifiedOutput(): void {
 }
 
 function updateDeidentifyGenerateButton(hasSyntheticOutput: boolean): void {
+  const hasMessageText = elements.input.value.trim().length > 0
+
+  elements.deidentifyGenerate.hidden = !hasMessageText
   elements.deidentifyGenerate.textContent = hasSyntheticOutput
     ? 'Hide synthetic message'
     : 'Generate synthetic message'

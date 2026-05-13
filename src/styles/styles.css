@@ -17,6 +17,7 @@
   --wrap-highlight: #5a3f08;
   --deid-highlight-bg: #3a3216;
   --deid-highlight-ink: #ffe9a6;
+  --value-ink: #cdd1d7;
   --shadow: 0 18px 40px rgb(0 0 0 / 38%);
   --sticky-offset: 12px;
   color: var(--ink);
@@ -48,6 +49,7 @@
   --wrap-highlight: #fff1a8;
   --deid-highlight-bg: #fff0b5;
   --deid-highlight-ink: #3d2e00;
+  --value-ink: #202833;
   --shadow: 0 18px 36px rgb(39 55 77 / 12%);
 }
 
@@ -367,7 +369,7 @@ textarea {
   width: 100%;
   height: clamp(150px, 26vh, 260px);
   min-height: 130px;
-  resize: both;
+  resize: vertical;
   overflow: auto;
   padding: 13px 14px;
   border: 1px solid var(--line);
@@ -540,7 +542,7 @@ details[open] > summary .row::before {
 
 .value {
   min-width: 0;
-  color: #cdd1d7;
+  color: var(--value-ink);
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 12px;
   overflow-wrap: anywhere;
