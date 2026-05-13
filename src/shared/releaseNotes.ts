@@ -6,6 +6,14 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.1.4',
+    date: '2026-05-13',
+    changes: [
+      'Expanded the main workspace across wide app windows so the pasted message editor and parsed structure have more usable room.',
+      'Added layout regression coverage for the wider workspace behavior.'
+    ]
+  },
+  {
     version: '2.1.3',
     date: '2026-05-13',
     changes: [
