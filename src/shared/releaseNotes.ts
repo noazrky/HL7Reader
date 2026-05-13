@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.1.0',
+    date: '2026-05-13',
+    changes: [
+      'Refreshed the main HL7 Reader window with a cleaner light interface, tighter parser rows, and clearer message/parse status summaries.',
+      'Kept the pasted message panel sticky while the parsed structure scrolls underneath.',
+      'Added UI layout regression coverage for the sticky message panel.'
+    ]
+  },
+  {
     version: '2.0.4',
     date: '2026-05-13',
     changes: [

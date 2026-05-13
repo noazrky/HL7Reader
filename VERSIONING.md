@@ -49,4 +49,4 @@ Examples:
 - `1.0.0` to `1.1.0`: minor version; preserve a separate EXE for the new minor release.
 - `1.0.0` to `2.0.0`: major version; preserve a separate EXE for the new major release.
 
-Release artifacts should continue using versioned EXE names such as `HL7 Reader 0.2.1.exe` so old EXEs remain separate from current output. Run `npm run tauri:build` after EXE changes so the direct compiled Tauri EXE is copied into the root `release` folder using the version from `VERSION`.
+Release artifacts should continue using versioned EXE names such as `HL7 Reader 0.2.1.exe` so old EXEs remain separate from current output. Minor UI releases, such as `2.1.0`, follow the same archive rule. Run `npm run tauri:build` after EXE changes so the direct compiled Tauri EXE is copied into the root `release` folder using the version from `VERSION`.
