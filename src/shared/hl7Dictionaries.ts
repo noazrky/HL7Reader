@@ -1006,8 +1006,8 @@ export const datatypeComponentNames: Record<string, Record<number, string>> = {
     6: 'Country',
     7: 'Address Type',
     8: 'Other Geographic Designation',
-      9: 'County/Parish Code'
-    },
+    9: 'County/Parish Code'
+  },
   XCN: {
     1: 'ID Number',
     2: 'Family Name',
