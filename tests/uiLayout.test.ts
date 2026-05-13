@@ -64,6 +64,15 @@ describe('app layout', () => {
     expect(inputPanelRule).toContain('z-index:')
   })
 
+  it('expands the workspace across wide app windows', () => {
+    const shellRule = ruleFor('.shell')
+    const editorRule = ruleFor('.message-editor')
+
+    expect(shellRule).toContain('width: calc(100vw - clamp(')
+    expect(shellRule).not.toContain('1180px')
+    expect(editorRule).toContain('width: 100%')
+  })
+
   it('uses a very dark accessible neutral theme', () => {
     const rootRule = ruleFor(':root')
     const bg = rootVariable('--bg')

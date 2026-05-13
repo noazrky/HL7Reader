@@ -68,7 +68,7 @@ button {
 }
 
 .shell {
-  width: min(1180px, calc(100vw - 40px));
+  width: calc(100vw - clamp(24px, 4vw, 80px));
   margin: 0 auto;
   padding: 14px 0 34px;
 }
