@@ -12,6 +12,47 @@ function ruleFor(selector: string): string {
   return match?.[1] ?? ''
 }
 
+function rootVariable(name: string): string {
+  const match = ruleFor(':root').match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`))
+
+  return match?.[1] ?? ''
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const [, red, green, blue] = hex.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/) ?? []
+
+  if (!red || !green || !blue) {
+    throw new Error(`Expected six-digit hex color, got ${hex}`)
+  }
+
+  return [red, green, blue].map((channel) => Number.parseInt(channel, 16)) as [number, number, number]
+}
+
+function relativeLuminance(hex: string): number {
+  const channels = hexToRgb(hex).map((channel) => {
+    const normalized = channel / 255
+
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4
+  })
+
+  return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2])
+}
+
+function contrastRatio(foreground: string, background: string): number {
+  const lighter = Math.max(relativeLuminance(foreground), relativeLuminance(background))
+  const darker = Math.min(relativeLuminance(foreground), relativeLuminance(background))
+
+  return (lighter + 0.05) / (darker + 0.05)
+}
+
+function neutralSpread(hex: string): number {
+  const channels = hexToRgb(hex)
+
+  return Math.max(...channels) - Math.min(...channels)
+}
+
 describe('app layout', () => {
   it('keeps the pasted message panel visible above the parsing results', () => {
     const inputPanelRule = ruleFor('.input-panel')
@@ -21,5 +62,26 @@ describe('app layout', () => {
     expect(inputPanelRule).toContain('position: sticky')
     expect(inputPanelRule).toContain('top: var(--sticky-offset)')
     expect(inputPanelRule).toContain('z-index:')
+  })
+
+  it('uses a very dark accessible neutral theme', () => {
+    const rootRule = ruleFor(':root')
+    const bg = rootVariable('--bg')
+    const surface = rootVariable('--surface')
+    const surfaceSoft = rootVariable('--surface-soft')
+    const ink = rootVariable('--ink')
+    const muted = rootVariable('--muted')
+    const accentStrong = rootVariable('--accent-strong')
+
+    expect(rootRule).toContain('color-scheme: dark')
+    expect(relativeLuminance(bg)).toBeLessThan(0.01)
+    expect(relativeLuminance(surface)).toBeLessThan(0.03)
+    expect(neutralSpread(bg)).toBeLessThanOrEqual(8)
+    expect(neutralSpread(surface)).toBeLessThanOrEqual(16)
+    expect(neutralSpread(surfaceSoft)).toBeLessThanOrEqual(18)
+    expect(contrastRatio(ink, bg)).toBeGreaterThanOrEqual(7)
+    expect(contrastRatio(ink, surface)).toBeGreaterThanOrEqual(7)
+    expect(contrastRatio(muted, surface)).toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(accentStrong, surface)).toBeGreaterThanOrEqual(4.5)
   })
 })
