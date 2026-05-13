@@ -9,6 +9,29 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 2.1.4 - 2026-05-13 07:30:17
+
+- Expanded the main workspace across wide app windows so the pasted message editor and parsed structure have more usable room.
+- Added layout regression coverage for the wider workspace behavior.
+
+## 2.1.3 - 2026-05-13 07:11:20
+
+- Kept the HL7 Reader title and menu button on one line when the window is narrowed.
+- Removed the in-window app icon from the main header while leaving the native window icon and About icon intact.
+- Added layout regression coverage for the single-row header and verified the frontend build.
+
+## 2.1.2 - 2026-05-13 06:44:36
+
+- Kept MSH-2 Encoding Characters as a single non-expandable value instead of splitting its structural delimiters into subcomponents.
+- Aligned parsed tree rows by reserving consistent disclosure-arrow space for expandable and flat rows.
+- Added parser and layout regression coverage for the MSH-2 and tree alignment behavior.
+
+## 2.1.1 - 2026-05-13 06:27:48
+
+- Moved the Show empty segments toggle into the Parsed structure header so the display option sits with the parsed output it controls.
+- Kept the parsed header layout stable across desktop and narrow window widths.
+- Verified the parser tests and frontend production build for the layout change.
+
 ## 2.1.0 - 2026-05-13 00:05:00
 
 - Refreshed the main HL7 Reader window with a cleaner light interface, tighter parser rows, and clearer message/parse status summaries.

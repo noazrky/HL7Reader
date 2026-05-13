@@ -6,6 +6,41 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '2.1.4',
+    date: '2026-05-13',
+    changes: [
+      'Expanded the main workspace across wide app windows so the pasted message editor and parsed structure have more usable room.',
+      'Added layout regression coverage for the wider workspace behavior.'
+    ]
+  },
+  {
+    version: '2.1.3',
+    date: '2026-05-13',
+    changes: [
+      'Kept the HL7 Reader title and menu button on one line when the window is narrowed.',
+      'Removed the in-window app icon from the main header while leaving the native window icon and About icon intact.',
+      'Added layout regression coverage for the single-row header and verified the frontend build.'
+    ]
+  },
+  {
+    version: '2.1.2',
+    date: '2026-05-13',
+    changes: [
+      'Kept MSH-2 Encoding Characters as a single non-expandable value instead of splitting its structural delimiters into subcomponents.',
+      'Aligned parsed tree rows by reserving consistent disclosure-arrow space for expandable and flat rows.',
+      'Added parser and layout regression coverage for the MSH-2 and tree alignment behavior.'
+    ]
+  },
+  {
+    version: '2.1.1',
+    date: '2026-05-13',
+    changes: [
+      'Moved the Show empty segments toggle into the Parsed structure header so the display option sits with the parsed output it controls.',
+      'Kept the parsed header layout stable across desktop and narrow window widths.',
+      'Verified the parser tests and frontend production build for the layout change.'
+    ]
+  },
+  {
     version: '2.1.0',
     date: '2026-05-13',
     changes: [

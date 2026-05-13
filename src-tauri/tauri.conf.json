@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "HL7 Reader",
-  "version": "2.1.0",
+  "version": "2.1.4",
   "identifier": "com.local.hl7reader.tauri",
   "build": {
     "beforeDevCommand": "npm run dev",

@@ -1,11 +1,14 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { appIconDataUrl } from '@shared/appIcon'
 import { releaseNotes } from '@shared/releaseNotes'
+import { initializeSystemTheme } from '@shared/systemTheme'
 import './styles/about.css'
 
 const appDisplayName = 'HL7 Reader'
 const currentVersion = __APP_VERSION__
 const about = document.querySelector<HTMLElement>('#about')
+
+void initializeSystemTheme()
 
 if (!about) {
   throw new Error('Missing about root')
