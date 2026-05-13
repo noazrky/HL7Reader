@@ -1,5 +1,11 @@
 import { invoke } from '@tauri-apps/api/core'
 import {
+  deidentifyHl7,
+  type DeidentificationChange,
+  type DeidentificationResult,
+  type DeidentificationSummary
+} from '@shared/hl7Deidentifier'
+import {
   decodeHl7Escapes,
   parseHl7,
   type ParsedComponent,
@@ -21,6 +27,7 @@ const sampleMessage = [
 
 type RendererState = {
   parsed: ParsedMessage
+  deidentified: DeidentificationResult | null
   showEmptyFields: boolean
 }
 
@@ -54,11 +61,33 @@ app.innerHTML = `
             <h2>Message</h2>
             <p id="message-summary">Waiting for pasted content</p>
           </div>
+          <div class="panel-actions">
+            <span class="wrap-warning" id="wrap-warning" hidden>
+              <span class="wrap-warning-icon" aria-hidden="true">!</span>
+              Lines are wrapped
+            </span>
+            <button class="secondary-button" id="deidentify-generate" type="button">Generate synthetic message</button>
+          </div>
         </div>
         <div class="message-editor" id="message-editor">
           <div class="message-highlights" id="message-highlights" aria-hidden="true"></div>
           <textarea id="message-input" spellcheck="false"></textarea>
         </div>
+      </section>
+
+      <section class="deidentify-output-panel" id="deidentify-output-panel" aria-label="Synthetic HL7 output" hidden>
+        <div class="panel-heading">
+          <div>
+            <h2>Synthetic message</h2>
+            <p id="deidentify-status">Generated locally from structured fields</p>
+          </div>
+          <div class="panel-actions">
+            <button class="secondary-button" id="deidentify-copy" type="button">Copy output</button>
+            <button class="secondary-button" id="deidentify-use" type="button">Use as input</button>
+          </div>
+        </div>
+        <div class="deidentify-summary" id="deidentify-summary"></div>
+        <pre class="deidentify-output" id="deidentify-highlighted-output" tabindex="0"></pre>
       </section>
 
       <section class="results-panel" aria-label="Parsed HL7 output">
@@ -82,6 +111,14 @@ app.innerHTML = `
 const input = document.querySelector<HTMLTextAreaElement>('#message-input')
 const messageEditor = document.querySelector<HTMLElement>('#message-editor')
 const messageHighlights = document.querySelector<HTMLElement>('#message-highlights')
+const deidentifyGenerate = document.querySelector<HTMLButtonElement>('#deidentify-generate')
+const deidentifyOutputPanel = document.querySelector<HTMLElement>('#deidentify-output-panel')
+const deidentifyStatus = document.querySelector<HTMLElement>('#deidentify-status')
+const deidentifySummary = document.querySelector<HTMLElement>('#deidentify-summary')
+const deidentifyHighlightedOutput = document.querySelector<HTMLElement>('#deidentify-highlighted-output')
+const deidentifyCopy = document.querySelector<HTMLButtonElement>('#deidentify-copy')
+const deidentifyUse = document.querySelector<HTMLButtonElement>('#deidentify-use')
+const wrapWarning = document.querySelector<HTMLElement>('#wrap-warning')
 const showEmpty = document.querySelector<HTMLInputElement>('#show-empty')
 const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle')
 const messageSummary = document.querySelector<HTMLElement>('#message-summary')
@@ -89,7 +126,25 @@ const parseSummary = document.querySelector<HTMLElement>('#parse-summary')
 const warnings = document.querySelector<HTMLElement>('#warnings')
 const tree = document.querySelector<HTMLElement>('#tree')
 
-if (!input || !messageEditor || !messageHighlights || !showEmpty || !menuToggle || !messageSummary || !parseSummary || !warnings || !tree) {
+if (
+  !input ||
+  !messageEditor ||
+  !messageHighlights ||
+  !deidentifyGenerate ||
+  !deidentifyOutputPanel ||
+  !deidentifyStatus ||
+  !deidentifySummary ||
+  !deidentifyHighlightedOutput ||
+  !deidentifyCopy ||
+  !deidentifyUse ||
+  !wrapWarning ||
+  !showEmpty ||
+  !menuToggle ||
+  !messageSummary ||
+  !parseSummary ||
+  !warnings ||
+  !tree
+) {
   throw new Error('Missing renderer elements')
 }
 
@@ -97,6 +152,14 @@ const elements = {
   input,
   messageEditor,
   messageHighlights,
+  deidentifyGenerate,
+  deidentifyOutputPanel,
+  deidentifyStatus,
+  deidentifySummary,
+  deidentifyHighlightedOutput,
+  deidentifyCopy,
+  deidentifyUse,
+  wrapWarning,
   showEmpty,
   menuToggle,
   messageSummary,
@@ -107,6 +170,7 @@ const elements = {
 
 const state: RendererState = {
   parsed: parseHl7(''),
+  deidentified: null,
   showEmptyFields: false
 }
 
@@ -116,6 +180,7 @@ elements.input.placeholder = sampleMessage
 
 elements.input.addEventListener('input', () => {
   state.parsed = parseHl7(elements.input.value)
+  state.deidentified = null
   render()
 })
 
@@ -128,6 +193,32 @@ messageInputResizeObserver.observe(elements.input)
 
 elements.showEmpty.addEventListener('change', () => {
   state.showEmptyFields = elements.showEmpty.checked
+  render()
+})
+
+elements.deidentifyGenerate.addEventListener('click', () => {
+  if (state.deidentified) {
+    state.deidentified = null
+    render()
+    return
+  }
+
+  state.deidentified = deidentifyHl7(elements.input.value)
+  render()
+})
+
+elements.deidentifyCopy.addEventListener('click', () => {
+  void copyDeidentifiedOutput()
+})
+
+elements.deidentifyUse.addEventListener('click', () => {
+  if (!state.deidentified) {
+    return
+  }
+
+  elements.input.value = state.deidentified.message
+  state.parsed = parseHl7(elements.input.value)
+  state.deidentified = null
   render()
 })
 
@@ -153,6 +244,7 @@ render()
 function render(): void {
   renderMessageHighlights()
   renderSummaries(state.parsed)
+  renderDeidentifiedOutput()
   renderWarnings(state.parsed)
   renderTree(state.parsed)
 }
@@ -209,9 +301,19 @@ function syncMessageHighlightScroll(): void {
 }
 
 function markWrappedMessageLines(): void {
+  let hasWrappedLines = false
+
   for (const line of elements.messageHighlights.querySelectorAll<HTMLElement>('.message-line')) {
-    line.classList.toggle('is-wrapped', line.getClientRects().length > 1)
+    const isWrapped = line.getClientRects().length > 1
+    line.classList.toggle('is-wrapped', isWrapped)
+    hasWrappedLines ||= isWrapped
   }
+
+  setWrappedLineWarning(hasWrappedLines)
+}
+
+function setWrappedLineWarning(hasWrappedLines: boolean): void {
+  elements.wrapWarning.hidden = !hasWrappedLines
 }
 
 function numericStyleValue(value: string): number {
@@ -254,6 +356,120 @@ function renderWarnings(parsed: ParsedMessage): void {
     item.textContent = warning
     elements.warnings.append(item)
   }
+}
+
+function renderDeidentifiedOutput(): void {
+  const result = state.deidentified
+  elements.deidentifyOutputPanel.hidden = !result
+  updateDeidentifyGenerateButton(Boolean(result))
+
+  if (!result) {
+    elements.deidentifySummary.replaceChildren()
+    elements.deidentifyHighlightedOutput.replaceChildren()
+    elements.deidentifyStatus.textContent = 'Generated locally from structured fields'
+    return
+  }
+
+  elements.deidentifyStatus.textContent = result.changes.length === 0
+    ? 'No structured patient or related-person fields were changed'
+    : `${result.changes.length} structured ${result.changes.length === 1 ? 'value' : 'values'} changed`
+  renderDeidentificationSummary(result.summary)
+  renderHighlightedDeidentificationOutput(result.message, result.changes)
+}
+
+function updateDeidentifyGenerateButton(hasSyntheticOutput: boolean): void {
+  elements.deidentifyGenerate.textContent = hasSyntheticOutput
+    ? 'Hide synthetic message'
+    : 'Generate synthetic message'
+}
+
+function renderDeidentificationSummary(summary: DeidentificationSummary): void {
+  elements.deidentifySummary.replaceChildren()
+
+  const entries: Array<[keyof DeidentificationSummary, string]> = [
+    ['names', 'Names'],
+    ['ids', 'IDs'],
+    ['addresses', 'Addresses'],
+    ['phones', 'Phones'],
+    ['dobs', 'DOBs']
+  ]
+
+  for (const [key, label] of entries) {
+    const item = document.createElement('span')
+    item.className = 'summary-pill'
+    item.textContent = `${summary[key]} ${label}`
+    elements.deidentifySummary.append(item)
+  }
+}
+
+function renderHighlightedDeidentificationOutput(
+  message: string,
+  changes: DeidentificationChange[]
+): void {
+  elements.deidentifyHighlightedOutput.replaceChildren()
+
+  const orderedChanges = [...changes].sort((first, second) => first.start - second.start)
+  let cursor = 0
+
+  for (const change of orderedChanges) {
+    if (change.start < cursor) {
+      continue
+    }
+
+    elements.deidentifyHighlightedOutput.append(document.createTextNode(message.slice(cursor, change.start)))
+
+    const changedValue = document.createElement('mark')
+    changedValue.className = `deidentify-change deidentify-change-${change.category}`
+    changedValue.textContent = message.slice(change.start, change.end)
+    changedValue.title = `${change.path} synthetic ${summaryLabel(change.category)}`
+    elements.deidentifyHighlightedOutput.append(changedValue)
+    cursor = change.end
+  }
+
+  elements.deidentifyHighlightedOutput.append(document.createTextNode(message.slice(cursor)))
+}
+
+function summaryLabel(category: keyof DeidentificationSummary): string {
+  const labels: Record<keyof DeidentificationSummary, string> = {
+    names: 'name',
+    ids: 'ID',
+    addresses: 'address',
+    phones: 'phone',
+    dobs: 'DOB'
+  }
+
+  return labels[category]
+}
+
+async function copyDeidentifiedOutput(): Promise<void> {
+  if (!state.deidentified) {
+    return
+  }
+
+  const output = state.deidentified.message
+
+  try {
+    if (!navigator.clipboard) {
+      throw new Error('Clipboard API unavailable')
+    }
+
+    await navigator.clipboard.writeText(output)
+    elements.deidentifyStatus.textContent = 'Synthetic message copied'
+    return
+  } catch {
+    selectDeidentifiedOutput()
+    elements.deidentifyStatus.textContent = 'Copy unavailable; output text selected'
+  }
+}
+
+function selectDeidentifiedOutput(): void {
+  const selection = window.getSelection()
+  const range = document.createRange()
+
+  range.selectNodeContents(elements.deidentifyHighlightedOutput)
+  selection?.removeAllRanges()
+  selection?.addRange(range)
+  elements.deidentifyHighlightedOutput.focus()
 }
 
 function renderTree(parsed: ParsedMessage): void {

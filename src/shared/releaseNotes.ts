@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '3.0.0',
+    date: '2026-05-13',
+    changes: [
+      'Added local-only synthetic HL7 de-identification for structured patient, guarantor, next-of-kin, and insured fields.',
+      'Added a separate synthetic message output with changed-value highlighting, copy/use actions, and a generate/hide toggle that keeps the original pasted message unchanged.',
+      'Added a wrapped-line warning in the message action bar and regression coverage for de-identification, no-network behavior, and the updated UI controls.'
+    ]
+  },
+  {
     version: '2.1.4',
     date: '2026-05-13',
     changes: [
