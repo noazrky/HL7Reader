@@ -9,6 +9,12 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 3.0.0 - 2026-05-13 11:56:59
+
+- Added local-only synthetic HL7 de-identification for structured patient, guarantor, next-of-kin, and insured fields.
+- Added a separate synthetic message output with changed-value highlighting, copy/use actions, and a generate/hide toggle that keeps the original pasted message unchanged.
+- Added a wrapped-line warning in the message action bar and regression coverage for de-identification, no-network behavior, and the updated UI controls.
+
 ## 2.1.4 - 2026-05-13 07:30:17
 
 - Expanded the main workspace across wide app windows so the pasted message editor and parsed structure have more usable room.

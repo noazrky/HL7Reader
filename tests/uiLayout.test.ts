@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 const styles = readFileSync(resolve(process.cwd(), 'src/styles/styles.css'), 'utf8')
 const main = readFileSync(resolve(process.cwd(), 'src/main.ts'), 'utf8')
+const packageJson = readFileSync(resolve(process.cwd(), 'package.json'), 'utf8')
 
 function ruleFor(selector: string): string {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -133,9 +134,13 @@ describe('app layout', () => {
     const textareaRule = ruleFor('textarea')
     const highlightRule = ruleFor('.message-highlights')
     const wrappedLineRule = ruleFor('.message-line.is-wrapped')
+    const wrapWarningRule = ruleFor('.wrap-warning')
 
     expect(main).toContain('id="message-highlights"')
+    expect(main).toContain('id="wrap-warning"')
+    expect(main).toContain('Lines are wrapped')
     expect(main).toContain('markWrappedMessageLines')
+    expect(main).toContain('setWrappedLineWarning')
     expect(textareaRule).toContain('resize: both')
     expect(textareaRule).toContain('overflow: auto')
     expect(highlightRule).toContain('pointer-events: none')
@@ -143,5 +148,41 @@ describe('app layout', () => {
     expect(styles).toContain('--wrap-highlight:')
     expect(wrappedLineRule).toContain('background: var(--wrap-highlight)')
     expect(wrappedLineRule).toContain('box-decoration-break: clone')
+    expect(wrapWarningRule).toContain('display: inline-flex')
+    expect(styles).toContain('.wrap-warning[hidden]')
+  })
+
+  it('provides a separate synthetic de-identification output panel', () => {
+    expect(main).toContain('Generate synthetic message')
+    expect(main).toContain('id="deidentify-output-panel"')
+    expect(main).toContain('id="deidentify-summary"')
+    expect(main).toContain('id="deidentify-highlighted-output"')
+    expect(main).toContain('Copy output')
+    expect(main).toContain('Use as input')
+    expect(main).toContain('Hide synthetic message')
+    expect(main).toContain('updateDeidentifyGenerateButton')
+    expect(main).not.toContain('Hide output')
+    expect(main).not.toContain('deidentifyHide')
+    expect(main).toContain('renderDeidentifiedOutput')
+  })
+
+  it('styles de-identified changed values in the output message', () => {
+    const outputPanelRule = ruleFor('.deidentify-output-panel')
+    const outputRule = ruleFor('.deidentify-output')
+    const changeRule = ruleFor('.deidentify-change')
+
+    expect(outputPanelRule).toContain('border: 1px solid var(--line)')
+    expect(outputRule).toContain('white-space: pre-wrap')
+    expect(changeRule).toContain('background:')
+    expect(changeRule).toContain('color:')
+    expect(changeRule).toContain('box-decoration-break: clone')
+  })
+
+  it('does not add runtime network behavior for de-identification', () => {
+    expect(main).not.toMatch(/\bfetch\s*\(/)
+    expect(main).not.toContain('WebSocket')
+    expect(main).not.toContain('EventSource')
+    expect(packageJson).not.toContain('faker')
+    expect(packageJson).not.toContain('@faker-js')
   })
 })
