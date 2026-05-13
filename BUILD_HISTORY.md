@@ -316,6 +316,35 @@ Troubleshooting notes:
 - If the Help window shows the native menu again, inspect `open_about_window` in `src-tauri/src/lib.rs`.
 - If the main menu toggle stops working, check the separate `toggle_menu` command and main window menu handlers before changing the Help window code.
 
+### 2.1.0
+
+Generation: Tauri.
+
+What changed:
+
+- Refreshed the main app window with a cleaner light interface, tighter parser rows, and clearer message/parse status summaries.
+- Kept the pasted HL7 message panel sticky while the parsed structure scrolls underneath.
+- Added UI layout regression coverage for the sticky message panel.
+
+Build steps used:
+
+```powershell
+npm test
+npm run build
+npm run tauri:build
+```
+
+Expected artifact:
+
+```text
+release/HL7 Reader 2.1.0.exe
+```
+
+Troubleshooting notes:
+
+- If the pasted message scrolls away with the parsed tree, check the `.input-panel` sticky positioning in `src/styles/styles.css`.
+- If the parser rows become hard to scan, compare the path/name/value grid rules in `src/styles/styles.css` with the UI layout regression in `tests/uiLayout.test.ts`.
+
 ## Common Troubleshooting Checklist
 
 ### `npm test` fails

@@ -33,9 +33,9 @@ if (!app) {
 app.innerHTML = `
   <section class="shell">
     <header class="topbar">
-      <div>
+      <div class="brand-block">
         <h1><span class="app-mark" aria-hidden="true">${appIconSvg}</span>HL7 Reader</h1>
-        <p>Paste an HL7 v2 message to inspect segments, fields, components, and values.</p>
+        <p>Local HL7 v2 message inspection</p>
       </div>
       <div class="topbar-actions">
         <label class="toggle">
@@ -50,22 +50,40 @@ app.innerHTML = `
       </div>
     </header>
 
-    <section class="input-panel" aria-label="HL7 message input">
-      <textarea id="message-input" spellcheck="false"></textarea>
-    </section>
+    <main class="workspace">
+      <section class="input-panel" aria-label="HL7 message input">
+        <div class="panel-heading">
+          <div>
+            <h2>Message</h2>
+            <p id="message-summary">Waiting for pasted content</p>
+          </div>
+        </div>
+        <textarea id="message-input" spellcheck="false"></textarea>
+      </section>
 
-    <section class="warnings" id="warnings"></section>
-    <section class="tree" id="tree" aria-label="Parsed HL7 output"></section>
+      <section class="results-panel" aria-label="Parsed HL7 output">
+        <div class="panel-heading results-heading">
+          <div>
+            <h2>Parsed structure</h2>
+            <p id="parse-summary">Paste a message to begin</p>
+          </div>
+        </div>
+        <section class="warnings" id="warnings"></section>
+        <section class="tree" id="tree"></section>
+      </section>
+    </main>
   </section>
 `
 
 const input = document.querySelector<HTMLTextAreaElement>('#message-input')
 const showEmpty = document.querySelector<HTMLInputElement>('#show-empty')
 const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle')
+const messageSummary = document.querySelector<HTMLElement>('#message-summary')
+const parseSummary = document.querySelector<HTMLElement>('#parse-summary')
 const warnings = document.querySelector<HTMLElement>('#warnings')
 const tree = document.querySelector<HTMLElement>('#tree')
 
-if (!input || !showEmpty || !menuToggle || !warnings || !tree) {
+if (!input || !showEmpty || !menuToggle || !messageSummary || !parseSummary || !warnings || !tree) {
   throw new Error('Missing renderer elements')
 }
 
@@ -73,6 +91,8 @@ const elements = {
   input,
   showEmpty,
   menuToggle,
+  messageSummary,
+  parseSummary,
   warnings,
   tree
 }
@@ -114,8 +134,34 @@ document.addEventListener('keydown', (event) => {
 render()
 
 function render(): void {
+  renderSummaries(state.parsed)
   renderWarnings(state.parsed)
   renderTree(state.parsed)
+}
+
+function renderSummaries(parsed: ParsedMessage): void {
+  const rawMessage = elements.input.value.trim()
+  const lineCount = rawMessage.length === 0 ? 0 : rawMessage.split(/\r\n|\r|\n/).filter((line) => line.trim().length > 0).length
+  const segmentCount = parsed.segments.length
+
+  elements.messageSummary.textContent = lineCount === 0
+    ? 'Waiting for pasted content'
+    : `${lineCount} message ${lineCount === 1 ? 'line' : 'lines'}`
+
+  if (segmentCount === 0) {
+    elements.parseSummary.textContent = 'Paste a message to begin'
+    return
+  }
+
+  const messageType = parsed.metadata.triggerEvent
+    ? `${parsed.metadata.messageType ?? 'HL7'}^${parsed.metadata.triggerEvent}`
+    : parsed.metadata.messageType
+  const version = parsed.metadata.version ? `HL7 ${parsed.metadata.version}` : 'HL7'
+  const segmentText = `${segmentCount} ${segmentCount === 1 ? 'segment' : 'segments'}`
+
+  elements.parseSummary.textContent = [segmentText, messageType, version]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 function renderWarnings(parsed: ParsedMessage): void {

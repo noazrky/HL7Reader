@@ -7,6 +7,7 @@ The app does not send messages to a server. Parsing happens locally in the deskt
 ## What It Does
 
 - Parses pasted HL7 v2 text into an expandable tree.
+- Keeps the pasted message visible while you scroll through the parsed structure below it.
 - Detects the active field, component, repetition, escape, and subcomponent delimiters from the `MSH` segment.
 - Labels known segments and fields using the bundled HL7 dictionary data.
 - Shows field paths such as `PID-5`, `OBX-3.2`, and repeated-field paths such as `PID-3(2)`.
@@ -25,7 +26,7 @@ Unknown custom `Z` segments are still displayed deterministically as custom segm
 
 ## Current Implementation
 
-The current application is version `2.0.1` and is implemented as a Tauri v2 desktop app with a Vite and TypeScript frontend.
+The current application is version `2.1.0` and is implemented as a Tauri v2 desktop app with a Vite and TypeScript frontend.
 
 The previous Electron implementation is kept under `archive/electron-v1` for historical reference. The workspace root is the active Tauri implementation.
 

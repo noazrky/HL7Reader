@@ -9,6 +9,12 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 2.1.0 - 2026-05-13 00:05:00
+
+- Refreshed the main HL7 Reader window with a cleaner light interface, tighter parser rows, and clearer message/parse status summaries.
+- Kept the pasted message panel sticky while the parsed structure scrolls underneath.
+- Added UI layout regression coverage for the sticky message panel.
+
 ## 2.0.4 - 2026-05-13 00:00:00
 
 - Added a Windows startup safeguard that checks for the Microsoft Edge WebView2 Runtime before opening the Tauri app.
