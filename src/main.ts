@@ -46,7 +46,7 @@ app.innerHTML = `
         <h1>HL7 Reader</h1>
       </div>
       <div class="topbar-actions">
-        <button class="icon-button" id="menu-toggle" type="button" aria-label="Toggle menu bar" title="Toggle menu bar">
+        <button class="icon-button" id="menu-toggle" type="button" aria-label="About" title="About">
           <span></span>
           <span></span>
           <span></span>
@@ -222,7 +222,7 @@ elements.deidentifyCopy.addEventListener('click', () => {
 })
 
 elements.menuToggle.addEventListener('click', () => {
-  void invoke('toggle_menu')
+  void invoke('show_about')
 })
 
 document.addEventListener('keydown', (event) => {
