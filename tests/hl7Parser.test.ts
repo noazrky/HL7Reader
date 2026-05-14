@@ -504,6 +504,15 @@ describe('parseHl7', () => {
     ])
   })
 
+  it('decodes a long value with no escape sequences without O(n²) allocation', () => {
+    const longValue = 'A'.repeat(1000)
+    const parsed = parseHl7(`MSH|^~\\&|APP|FAC|APP|FAC|202405091105||ORU^R01|MSG|P|2.5\rNTE|1|L|${longValue}`)
+    const comment = parsed.segments[1].fields.find((field) => field.path === 'NTE-3')
+
+    expect(comment?.rawValue).toBe(longValue)
+    expect(decodeHl7Escapes(longValue, parsed.delimiters)).toBe(longValue)
+  })
+
   it('returns an empty parse for blank input', () => {
     const parsed = parseHl7('   \r\n  ')
 

@@ -6,6 +6,17 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '3.0.2',
+    date: '2026-05-14',
+    changes: [
+      'Debounced input parsing so the parsed structure and tree only update 150 ms after typing stops, keeping highlights in real-time sync without per-keystroke layout thrash.',
+      'Eliminated duplicated parser utilities shared between the HL7 parser and de-identifier modules.',
+      'Replaced character-by-character string building in escape decoding with a slice-and-join approach to avoid O(n²) allocation on long values.',
+      'Fixed a zoom-state drift bug where the stored zoom level could advance past the actual window zoom when the window call failed.',
+      'Added edge-case tests and a KNOWN_SEGMENT_IDS export for programmatic segment lookup.'
+    ]
+  },
+  {
     version: '3.0.1',
     date: '2026-05-13',
     changes: [

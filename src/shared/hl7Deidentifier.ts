@@ -1,3 +1,4 @@
+import { detectDelimiters, splitHl7 } from './hl7Parser'
 import type { Hl7Delimiters } from './hl7Parser'
 
 export type DeidentificationSummary = {
@@ -72,14 +73,6 @@ type SyntheticAddress = {
   city: string
   state: string
   zip: string
-}
-
-const defaultDelimiters: Hl7Delimiters = {
-  field: '|',
-  component: '^',
-  repetition: '~',
-  escape: '\\',
-  subcomponent: '&'
 }
 
 const emptySummary: DeidentificationSummary = {
@@ -266,22 +259,6 @@ function splitMessage(message: string): MessagePiece[] {
   return pieces
 }
 
-function detectDelimiters(firstLine: string): Hl7Delimiters {
-  if (!firstLine.startsWith('MSH') || firstLine.length < 8) {
-    return defaultDelimiters
-  }
-
-  const encodingCharacters = firstLine.slice(4, 8)
-
-  return {
-    field: firstLine.charAt(3) || defaultDelimiters.field,
-    component: encodingCharacters.charAt(0) || defaultDelimiters.component,
-    repetition: encodingCharacters.charAt(1) || defaultDelimiters.repetition,
-    escape: encodingCharacters.charAt(2) || defaultDelimiters.escape,
-    subcomponent: encodingCharacters.charAt(3) || defaultDelimiters.subcomponent
-  }
-}
-
 function detectMessageDate(pieces: MessagePiece[], delimiters: Hl7Delimiters): DateParts {
   const msh = pieces.find((piece) => piece.text.startsWith('MSH'))?.text
 
@@ -325,7 +302,7 @@ function transformSegment(line: string, startOffset: number, context: TransformC
     const transformed = transformField(path, value, context)
 
     rebuilt += context.delimiters.field
-    if (transformed.value !== value) {
+    if (transformed.value !== value && transformed.category !== null) {
       context.summary[transformed.category] += 1
       context.changes.push({
         path,
@@ -345,14 +322,11 @@ function transformField(
   path: string,
   value: string,
   context: TransformContext
-): { value: string; category: DeidentificationCategory } {
+): { value: string; category: DeidentificationCategory | null } {
   const rule = targetFieldRules[path]
 
   if (!rule || value.length === 0) {
-    return {
-      value,
-      category: 'ids'
-    }
+    return { value, category: null }
   }
 
   return {
@@ -412,10 +386,10 @@ function transformRepetition(repetition: string, kind: FieldTransformKind, conte
 }
 
 function transformXpn(value: string, context: TransformContext): string {
-  const name = syntheticName(value)
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `xpn:${value}`, () => {
+    const name = syntheticName(value)
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return name.family
     }
@@ -433,10 +407,10 @@ function transformXpn(value: string, context: TransformContext): string {
 }
 
 function transformXcn(value: string, context: TransformContext): string {
-  const name = syntheticName(value)
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `xcn:${value}`, () => {
+    const name = syntheticName(value)
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return syntheticId(value, 'XCN')
     }
@@ -455,9 +429,8 @@ function transformXcn(value: string, context: TransformContext): string {
 }
 
 function transformXon(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `xon:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
     const organization = `${pick(familyNames, value, 8)} Test Group`
 
     if (components.length <= 1) {
@@ -480,9 +453,9 @@ function transformXon(value: string, context: TransformContext): string {
 }
 
 function transformCx(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `cx:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return syntheticId(value, 'MR')
     }
@@ -495,9 +468,9 @@ function transformCx(value: string, context: TransformContext): string {
 }
 
 function transformDln(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `dln:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return syntheticId(value, 'DL')
     }
@@ -510,10 +483,10 @@ function transformDln(value: string, context: TransformContext): string {
 }
 
 function transformAddress(value: string, context: TransformContext): string {
-  const address = syntheticAddress(value)
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `address:${value}`, () => {
+    const address = syntheticAddress(value)
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return address.street
     }
@@ -530,10 +503,10 @@ function transformAddress(value: string, context: TransformContext): string {
 }
 
 function transformPhone(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-  const phone = syntheticPhone(value)
-
   return replacementFor(context, `phone:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+    const phone = syntheticPhone(value)
+
     if (components.length <= 1) {
       return phone
     }
@@ -569,6 +542,8 @@ function syntheticDob(value: string, context: TransformContext): string {
     const day = 1 + (hashString(`${value}:day`) % 28)
     const syntheticYear = messageDate.year - syntheticAge
     const synthetic = `${syntheticYear}${pad2(month)}${pad2(day)}`
+    // Month/day randomisation can push the effective age just above 89 even when the year
+    // is clamped, so re-check the final date and fall back to the exact safe-harbor boundary.
     const adjusted = ageAt(parseDateParts(synthetic) ?? messageDate, messageDate) > 89
       ? `${messageDate.year - 89}${pad2(messageDate.month)}${pad2(messageDate.day)}`
       : synthetic
@@ -645,36 +620,6 @@ function replacementFor(context: TransformContext, key: string, buildValue: () =
   const value = buildValue()
   context.replacements.set(key, value)
   return value
-}
-
-function splitHl7(value: string, separator: string, escape: string): string[] {
-  const parts: string[] = []
-  let partStart = 0
-  let index = 0
-
-  while (index < value.length) {
-    if (value[index] === escape) {
-      const escapeEnd = value.indexOf(escape, index + 1)
-
-      if (escapeEnd === -1) {
-        index += 1
-        continue
-      }
-
-      index = escapeEnd + 1
-      continue
-    }
-
-    if (value[index] === separator) {
-      parts.push(value.slice(partStart, index))
-      partStart = index + 1
-    }
-
-    index += 1
-  }
-
-  parts.push(value.slice(partStart))
-  return parts
 }
 
 function pick(values: string[], seed: string, salt: number): string {

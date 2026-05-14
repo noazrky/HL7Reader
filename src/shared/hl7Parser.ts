@@ -61,7 +61,7 @@ export type ParsedMessage = {
   segments: ParsedSegment[]
 }
 
-const defaultDelimiters: Hl7Delimiters = {
+export const defaultDelimiters: Hl7Delimiters = {
   field: '|',
   component: '^',
   repetition: '~',
@@ -100,12 +100,12 @@ export function decodeHl7Escapes(value: string, delimiters: Hl7Delimiters): stri
   }
 
   const escape = delimiters.escape
-  let decoded = ''
+  const parts: string[] = []
+  let lastCut = 0
   let index = 0
 
   while (index < value.length) {
     if (value[index] !== escape) {
-      decoded += value[index]
       index += 1
       continue
     }
@@ -113,31 +113,32 @@ export function decodeHl7Escapes(value: string, delimiters: Hl7Delimiters): stri
     const endIndex = value.indexOf(escape, index + 1)
 
     if (endIndex === -1) {
-      decoded += value[index]
       index += 1
       continue
     }
 
+    parts.push(value.slice(lastCut, index))
     const token = value.slice(index + 1, endIndex)
-    decoded += decodeEscapeToken(token, delimiters)
+    parts.push(decodeEscapeToken(token, delimiters))
     index = endIndex + 1
+    lastCut = index
   }
 
-  return decoded
+  parts.push(value.slice(lastCut))
+  return parts.join('')
 }
 
 function normalizeSegments(message: string): string[] {
   return message
-    .replace(/\r\n/g, '\r')
-    .replace(/\n/g, '\r')
+    .replace(/\r\n|\n/g, '\r')
     .split('\r')
     .map((line) => line.trimEnd())
     .filter((line) => line.trim().length > 0)
 }
 
-function detectDelimiters(firstLine: string, warnings: string[]): Hl7Delimiters {
+export function detectDelimiters(firstLine: string, warnings?: string[]): Hl7Delimiters {
   if (!firstLine.startsWith('MSH') || firstLine.length < 8) {
-    warnings.push('No valid MSH segment found. Default HL7 delimiters were used.')
+    warnings?.push('No valid MSH segment found. Default HL7 delimiters were used.')
     return defaultDelimiters
   }
 
@@ -272,7 +273,7 @@ function parseSubcomponents(
   })
 }
 
-function splitHl7(value: string, separator: string, escape: string): string[] {
+export function splitHl7(value: string, separator: string, escape: string): string[] {
   const parts: string[] = []
   let partStart = 0
   let index = 0
@@ -331,14 +332,14 @@ function decodeEscapeToken(token: string, delimiters: Hl7Delimiters): string {
 }
 
 function extractMetadata(segments: ParsedSegment[]): ParsedMessageMetadata {
-  const msh = segments.find((segment) => segment.id === 'MSH')
+  const msh = segments[0]?.id === 'MSH' ? segments[0] : undefined
 
   if (!msh) {
     return {}
   }
 
-  const messageTypeField = msh.fields.find((field) => field.path === 'MSH-9')
-  const version = msh.fields.find((field) => field.path === 'MSH-12')?.rawValue
+  const messageTypeField = msh.fields[8]
+  const version = msh.fields[11]?.rawValue
   const messageTypeParts = messageTypeField?.repetitions[0]?.components ?? []
 
   return {

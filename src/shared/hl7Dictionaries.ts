@@ -1093,3 +1093,5 @@ export function getComponentName(datatype: string | undefined, position: number)
 
   return datatypeComponentNames[datatype]?.[position] ?? `Component ${position}`
 }
+
+export const KNOWN_SEGMENT_IDS: Set<string> = new Set(Object.keys(segmentDefinitions))
