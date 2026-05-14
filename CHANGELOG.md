@@ -15,6 +15,10 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated the hamburger button `aria-label` and `title` from "Toggle menu bar" to "About".
 - Fixed a Windows lockup where opening the About window from a frontend `invoke('show_about')` (the hamburger button or F1) could deadlock the UI thread and render a blank window. The `show_about` Tauri command now spawns the window creation on the async runtime so the invoke handler returns immediately.
 
+## 3.0.3 - 2026-05-13
+
+- Updated the About window color scheme to match the main app palette in both dark and light modes.
+
 ## 3.0.2 - 2026-05-14
 
 - Debounced the input event handler so parse and tree-render only fire 150 ms after the last keystroke, keeping the highlight overlay in real-time sync without layout thrash on every character.

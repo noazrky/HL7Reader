@@ -146,6 +146,13 @@ describe('app layout', () => {
     expect(actionsRule).toContain('flex: 0 0 auto')
   })
 
+  it('opens About from the hamburger and F1 while keeping Ctrl+Shift+M for the menu', () => {
+    expect(main).toContain('id="menu-toggle" type="button" aria-label="About" title="About"')
+    expect(main).toMatch(/elements\.menuToggle\.addEventListener\('click',\s*\(\) => \{\s*void invoke\('show_about'\)\s*\}\)/)
+    expect(main).toMatch(/if \(event\.key === 'F1'\) \{\s*event\.preventDefault\(\)\s*void invoke\('show_about'\)\s*return\s*\}/)
+    expect(main).toMatch(/if \(event\.ctrlKey && event\.shiftKey && event\.key\.toLowerCase\(\) === 'm'\) \{\s*event\.preventDefault\(\)\s*void invoke\('toggle_menu'\)\s*\}/)
+  })
+
   it('keeps pasted message resizing vertical-only and highlights wrapped logical lines', () => {
     const textareaRule = ruleFor('textarea')
     const highlightRule = ruleFor('.message-highlights')
