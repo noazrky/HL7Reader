@@ -5,14 +5,16 @@
 **Scope:** All TypeScript source, Rust backend, CSS, and test files  
 **Verdict:** No critical bugs found. The codebase is well-structured, type-safe, and HIPAA-compliant. Two major and fifteen minor/micro issues identified below.
 
+**Follow-up:** Major issues (Findings 1 & 2) resolved on branch `claude/code-review-fixes-0BLl1` (2026-05-14).
+
 ---
 
 ## Summary Table
 
 | # | File | Severity | Category | Issue |
 |---|---|---|---|---|
-| 1 | `hl7Parser.ts` + `hl7Deidentifier.ts` | **Major** | Duplication | `splitHl7`, `detectDelimiters`, `defaultDelimiters` duplicated verbatim |
-| 2 | `main.ts:177` | **Major** | Performance | No debounce on `input` event — full re-parse and re-render on every keystroke |
+| 1 | `hl7Parser.ts` + `hl7Deidentifier.ts` | **Major** ✅ | Duplication | `splitHl7`, `detectDelimiters`, `defaultDelimiters` duplicated verbatim |
+| 2 | `main.ts:177` | **Major** ✅ | Performance | No debounce on `input` event — full re-parse and re-render on every keystroke |
 | 3 | `hl7Parser.ts:107` | Minor | Performance | O(n²) string concatenation in `decodeHl7Escapes` |
 | 4 | `hl7Parser.ts:130` | Micro | Performance | Two-pass regex in `normalizeSegments` |
 | 5 | `hl7Parser.ts:333` | Minor | Performance | Linear scans in `extractMetadata` (MSH is always first) |
@@ -31,7 +33,7 @@
 
 ---
 
-## Finding 1 — Code Duplication Across Parser and Deidentifier (Major)
+## Finding 1 — Code Duplication Across Parser and Deidentifier (Major) ✅ Fixed
 
 **Files:** `src/shared/hl7Parser.ts`, `src/shared/hl7Deidentifier.ts`
 
@@ -56,9 +58,11 @@ export function detectDelimiters(firstLine: string): Hl7Delimiters { ... }
 import { splitHl7, defaultDelimiters, detectDelimiters } from './hl7Parser'
 ```
 
+**Resolution:** `splitHl7` and `defaultDelimiters` are now exported from `hl7Parser.ts`. `detectDelimiters` is exported with `warnings` as an optional parameter so the parser continues to collect warnings while the deidentifier uses it without. The three duplicate definitions are removed from `hl7Deidentifier.ts`.
+
 ---
 
-## Finding 2 — No Debounce on `input` Event (Major Performance)
+## Finding 2 — No Debounce on `input` Event (Major Performance) ✅ Fixed
 
 **File:** `src/main.ts:177–181`
 
@@ -90,6 +94,8 @@ elements.input.addEventListener('input', () => {
   }, 150)
 })
 ```
+
+**Resolution:** Implemented as recommended. `renderMessageHighlights()` fires on every keystroke for visual sync; parse and all downstream renders are debounced 150 ms.
 
 ---
 

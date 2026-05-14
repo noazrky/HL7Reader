@@ -61,7 +61,7 @@ export type ParsedMessage = {
   segments: ParsedSegment[]
 }
 
-const defaultDelimiters: Hl7Delimiters = {
+export const defaultDelimiters: Hl7Delimiters = {
   field: '|',
   component: '^',
   repetition: '~',
@@ -135,9 +135,9 @@ function normalizeSegments(message: string): string[] {
     .filter((line) => line.trim().length > 0)
 }
 
-function detectDelimiters(firstLine: string, warnings: string[]): Hl7Delimiters {
+export function detectDelimiters(firstLine: string, warnings?: string[]): Hl7Delimiters {
   if (!firstLine.startsWith('MSH') || firstLine.length < 8) {
-    warnings.push('No valid MSH segment found. Default HL7 delimiters were used.')
+    warnings?.push('No valid MSH segment found. Default HL7 delimiters were used.')
     return defaultDelimiters
   }
 
@@ -272,7 +272,7 @@ function parseSubcomponents(
   })
 }
 
-function splitHl7(value: string, separator: string, escape: string): string[] {
+export function splitHl7(value: string, separator: string, escape: string): string[] {
   const parts: string[] = []
   let partStart = 0
   let index = 0

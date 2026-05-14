@@ -171,13 +171,21 @@ const state: RendererState = {
 }
 
 let messageHighlightFrame = 0
+let parseTimer = 0
 
 elements.input.placeholder = sampleMessage
 
 elements.input.addEventListener('input', () => {
-  state.parsed = parseHl7(elements.input.value)
-  state.deidentified = null
-  render()
+  renderMessageHighlights()
+  clearTimeout(parseTimer)
+  parseTimer = window.setTimeout(() => {
+    state.parsed = parseHl7(elements.input.value)
+    state.deidentified = null
+    renderSummaries(state.parsed)
+    renderWarnings(state.parsed)
+    renderDeidentifiedOutput()
+    renderTree(state.parsed)
+  }, 150)
 })
 
 elements.input.addEventListener('scroll', syncMessageHighlightScroll)

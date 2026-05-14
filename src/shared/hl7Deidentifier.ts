@@ -1,3 +1,4 @@
+import { detectDelimiters, splitHl7 } from './hl7Parser'
 import type { Hl7Delimiters } from './hl7Parser'
 
 export type DeidentificationSummary = {
@@ -72,14 +73,6 @@ type SyntheticAddress = {
   city: string
   state: string
   zip: string
-}
-
-const defaultDelimiters: Hl7Delimiters = {
-  field: '|',
-  component: '^',
-  repetition: '~',
-  escape: '\\',
-  subcomponent: '&'
 }
 
 const emptySummary: DeidentificationSummary = {
@@ -264,22 +257,6 @@ function splitMessage(message: string): MessagePiece[] {
   }
 
   return pieces
-}
-
-function detectDelimiters(firstLine: string): Hl7Delimiters {
-  if (!firstLine.startsWith('MSH') || firstLine.length < 8) {
-    return defaultDelimiters
-  }
-
-  const encodingCharacters = firstLine.slice(4, 8)
-
-  return {
-    field: firstLine.charAt(3) || defaultDelimiters.field,
-    component: encodingCharacters.charAt(0) || defaultDelimiters.component,
-    repetition: encodingCharacters.charAt(1) || defaultDelimiters.repetition,
-    escape: encodingCharacters.charAt(2) || defaultDelimiters.escape,
-    subcomponent: encodingCharacters.charAt(3) || defaultDelimiters.subcomponent
-  }
 }
 
 function detectMessageDate(pieces: MessagePiece[], delimiters: Hl7Delimiters): DateParts {
@@ -645,36 +622,6 @@ function replacementFor(context: TransformContext, key: string, buildValue: () =
   const value = buildValue()
   context.replacements.set(key, value)
   return value
-}
-
-function splitHl7(value: string, separator: string, escape: string): string[] {
-  const parts: string[] = []
-  let partStart = 0
-  let index = 0
-
-  while (index < value.length) {
-    if (value[index] === escape) {
-      const escapeEnd = value.indexOf(escape, index + 1)
-
-      if (escapeEnd === -1) {
-        index += 1
-        continue
-      }
-
-      index = escapeEnd + 1
-      continue
-    }
-
-    if (value[index] === separator) {
-      parts.push(value.slice(partStart, index))
-      partStart = index + 1
-    }
-
-    index += 1
-  }
-
-  parts.push(value.slice(partStart))
-  return parts
 }
 
 function pick(values: string[], seed: string, salt: number): string {
