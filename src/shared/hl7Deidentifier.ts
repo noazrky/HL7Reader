@@ -302,7 +302,7 @@ function transformSegment(line: string, startOffset: number, context: TransformC
     const transformed = transformField(path, value, context)
 
     rebuilt += context.delimiters.field
-    if (transformed.value !== value) {
+    if (transformed.value !== value && transformed.category !== null) {
       context.summary[transformed.category] += 1
       context.changes.push({
         path,
@@ -322,14 +322,11 @@ function transformField(
   path: string,
   value: string,
   context: TransformContext
-): { value: string; category: DeidentificationCategory } {
+): { value: string; category: DeidentificationCategory | null } {
   const rule = targetFieldRules[path]
 
   if (!rule || value.length === 0) {
-    return {
-      value,
-      category: 'ids'
-    }
+    return { value, category: null }
   }
 
   return {
@@ -389,10 +386,10 @@ function transformRepetition(repetition: string, kind: FieldTransformKind, conte
 }
 
 function transformXpn(value: string, context: TransformContext): string {
-  const name = syntheticName(value)
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `xpn:${value}`, () => {
+    const name = syntheticName(value)
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return name.family
     }
@@ -410,10 +407,10 @@ function transformXpn(value: string, context: TransformContext): string {
 }
 
 function transformXcn(value: string, context: TransformContext): string {
-  const name = syntheticName(value)
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `xcn:${value}`, () => {
+    const name = syntheticName(value)
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return syntheticId(value, 'XCN')
     }
@@ -432,9 +429,8 @@ function transformXcn(value: string, context: TransformContext): string {
 }
 
 function transformXon(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `xon:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
     const organization = `${pick(familyNames, value, 8)} Test Group`
 
     if (components.length <= 1) {
@@ -457,9 +453,9 @@ function transformXon(value: string, context: TransformContext): string {
 }
 
 function transformCx(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `cx:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return syntheticId(value, 'MR')
     }
@@ -472,9 +468,9 @@ function transformCx(value: string, context: TransformContext): string {
 }
 
 function transformDln(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `dln:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return syntheticId(value, 'DL')
     }
@@ -487,10 +483,10 @@ function transformDln(value: string, context: TransformContext): string {
 }
 
 function transformAddress(value: string, context: TransformContext): string {
-  const address = syntheticAddress(value)
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-
   return replacementFor(context, `address:${value}`, () => {
+    const address = syntheticAddress(value)
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+
     if (components.length <= 1) {
       return address.street
     }
@@ -507,10 +503,10 @@ function transformAddress(value: string, context: TransformContext): string {
 }
 
 function transformPhone(value: string, context: TransformContext): string {
-  const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
-  const phone = syntheticPhone(value)
-
   return replacementFor(context, `phone:${value}`, () => {
+    const components = splitHl7(value, context.delimiters.component, context.delimiters.escape)
+    const phone = syntheticPhone(value)
+
     if (components.length <= 1) {
       return phone
     }
@@ -546,6 +542,8 @@ function syntheticDob(value: string, context: TransformContext): string {
     const day = 1 + (hashString(`${value}:day`) % 28)
     const syntheticYear = messageDate.year - syntheticAge
     const synthetic = `${syntheticYear}${pad2(month)}${pad2(day)}`
+    // Month/day randomisation can push the effective age just above 89 even when the year
+    // is clamped, so re-check the final date and fall back to the exact safe-harbor boundary.
     const adjusted = ageAt(parseDateParts(synthetic) ?? messageDate, messageDate) > 89
       ? `${messageDate.year - 89}${pad2(messageDate.month)}${pad2(messageDate.day)}`
       : synthetic

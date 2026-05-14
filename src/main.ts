@@ -173,6 +173,8 @@ const state: RendererState = {
 let messageHighlightFrame = 0
 let parseTimer = 0
 
+const REPEATED_PATH_RE = /\(\d+\)$/
+
 elements.input.placeholder = sampleMessage
 
 elements.input.addEventListener('input', () => {
@@ -239,14 +241,15 @@ document.addEventListener('keydown', (event) => {
 render()
 
 function render(): void {
-  renderMessageHighlights()
-  renderSummaries(state.parsed)
+  const lines = elements.input.value.split(/\r\n|\r|\n/)
+  renderMessageHighlights(lines)
+  renderSummaries(state.parsed, lines)
   renderDeidentifiedOutput()
   renderWarnings(state.parsed)
   renderTree(state.parsed)
 }
 
-function renderMessageHighlights(): void {
+function renderMessageHighlights(lines?: string[]): void {
   elements.messageHighlights.replaceChildren()
 
   if (elements.input.value.length === 0) {
@@ -254,15 +257,15 @@ function renderMessageHighlights(): void {
     return
   }
 
-  const lines = elements.input.value.split(/\r\n|\r|\n/)
+  const messageLines = lines ?? elements.input.value.split(/\r\n|\r|\n/)
 
-  for (const [index, line] of lines.entries()) {
+  for (const [index, line] of messageLines.entries()) {
     const lineEl = document.createElement('span')
     lineEl.className = 'message-line'
     lineEl.textContent = line.length > 0 ? line : '\u200B'
     elements.messageHighlights.append(lineEl)
 
-    if (index < lines.length - 1) {
+    if (index < messageLines.length - 1) {
       elements.messageHighlights.append(document.createElement('br'))
     }
   }
@@ -319,9 +322,10 @@ function numericStyleValue(value: string): number {
   return Number.isFinite(numericValue) ? numericValue : 0
 }
 
-function renderSummaries(parsed: ParsedMessage): void {
+function renderSummaries(parsed: ParsedMessage, lines?: string[]): void {
   const rawMessage = elements.input.value.trim()
-  const lineCount = rawMessage.length === 0 ? 0 : rawMessage.split(/\r\n|\r|\n/).filter((line) => line.trim().length > 0).length
+  const messageLines = lines ?? rawMessage.split(/\r\n|\r|\n/)
+  const lineCount = rawMessage.length === 0 ? 0 : messageLines.filter((line) => line.trim().length > 0).length
   const segmentCount = parsed.segments.length
 
   elements.messageSummary.textContent = lineCount === 0
@@ -429,16 +433,16 @@ function renderHighlightedDeidentificationOutput(
   elements.deidentifyHighlightedOutput.append(document.createTextNode(message.slice(cursor)))
 }
 
-function summaryLabel(category: keyof DeidentificationSummary): string {
-  const labels: Record<keyof DeidentificationSummary, string> = {
-    names: 'name',
-    ids: 'ID',
-    addresses: 'address',
-    phones: 'phone',
-    dobs: 'DOB'
-  }
+const SUMMARY_LABELS: Record<keyof DeidentificationSummary, string> = {
+  names: 'name',
+  ids: 'ID',
+  addresses: 'address',
+  phones: 'phone',
+  dobs: 'DOB'
+}
 
-  return labels[category]
+function summaryLabel(category: keyof DeidentificationSummary): string {
+  return SUMMARY_LABELS[category]
 }
 
 async function copyDeidentifiedOutput(): Promise<void> {
@@ -512,11 +516,19 @@ function segmentNode(segment: ParsedSegment): HTMLElement {
 }
 
 function fieldNode(field: ParsedField): HTMLElement {
-  const hasNested = field.repetitions.some((repetition) => repetition.components.length > 1 || repetition.components.some((component) => component.subcomponents.length > 0))
+  const fieldName = field.datatype ? `${field.name} (${field.datatype})` : field.name
+  let hasNested = false
+  const builtRepetitions: HTMLElement[] = []
+
+  for (const repetition of field.repetitions) {
+    if (!hasNested && (repetition.components.length > 1 || repetition.components.some((c) => c.subcomponents.length > 0))) {
+      hasNested = true
+    }
+    builtRepetitions.push(repetitionNode(repetition))
+  }
+
   const container = document.createElement(hasNested ? 'details' : 'div')
   container.className = `node field ${field.rawValue.length === 0 ? 'is-empty' : ''}`
-
-  const fieldName = field.datatype ? `${field.name} (${field.datatype})` : field.name
 
   if (hasNested) {
     const summaryEl = document.createElement('summary')
@@ -525,8 +537,8 @@ function fieldNode(field: ParsedField): HTMLElement {
 
     const children = document.createElement('div')
     children.className = 'children'
-    for (const repetition of field.repetitions) {
-      children.append(repetitionNode(repetition))
+    for (const node of builtRepetitions) {
+      children.append(node)
     }
     container.append(children)
     return container
@@ -537,7 +549,7 @@ function fieldNode(field: ParsedField): HTMLElement {
 }
 
 function repetitionNode(repetition: ParsedRepetition): HTMLElement {
-  const hasRepeatedPath = /\(\d+\)$/.test(repetition.path)
+  const hasRepeatedPath = REPEATED_PATH_RE.test(repetition.path)
   const container = document.createElement(hasRepeatedPath ? 'details' : 'div')
   container.className = 'node repetition'
 

@@ -9,6 +9,25 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 3.0.2 - 2026-05-14
+
+- Debounced the input event handler so parse and tree-render only fire 150 ms after the last keystroke, keeping the highlight overlay in real-time sync without layout thrash on every character.
+- Eliminated duplicated `splitHl7`, `detectDelimiters`, and `defaultDelimiters` definitions by exporting them from `hl7Parser` and importing in `hl7Deidentifier`.
+- Replaced O(n²) character-by-character string concatenation in `decodeHl7Escapes` with a slice-and-join approach.
+- Collapsed the two-pass line-ending normalisation regex in `normalizeSegments` into a single alternation pass.
+- Replaced linear segment and field scans in `extractMetadata` with direct index access.
+- Made the `transformField` return category explicitly nullable so untargeted fields cannot accidentally inflate de-identification summary counts.
+- Moved expensive `syntheticName`, `syntheticAddress`, `syntheticPhone`, and `splitHl7` calls inside `replacementFor` factory callbacks so cache hits skip all computation.
+- Computed the message line split once per `render()` call and shared it across `renderMessageHighlights` and `renderSummaries`.
+- Hoisted the `summaryLabel` lookup record and the `REPEATED_PATH_RE` pattern to module scope to avoid per-call allocations.
+- Combined the `hasNested` pre-scan and repetition render loop in `fieldNode` into a single traversal.
+- Added debug-build error logging to `with_main_window` so menu action failures are visible during development.
+- Fixed a zoom-state drift bug where `adjust_zoom` mutated the stored zoom level before confirming the window call succeeded.
+- Inlined the trivial `to_message` Rust helper as `map_err(|e| e.to_string())` at each call site.
+- Added edge-case tests: long escape-free value, message with no PID, MSH-only message, malformed DOB fallback, and mixed line endings.
+- Added a `KNOWN_SEGMENT_IDS` set export to `hl7Dictionaries` for O(1) programmatic segment lookup.
+- Added a comment explaining the double age-cap check in `syntheticDob`.
+
 ## 3.0.1 - 2026-05-13 12:20:39
 
 - Limited the pasted Message box to vertical resizing so horizontal adjustment cannot break the app layout.

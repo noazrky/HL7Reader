@@ -149,6 +149,63 @@ describe('deidentifyHl7', () => {
     expect(ageAt(over89Dob, '20240509')).toBeLessThanOrEqual(89)
   })
 
+  it('makes no changes when the message has no PID segment', () => {
+    const message = [
+      'MSH|^~\\&|LAB|HOSP|EHR|HOSP|202405091105||ORU^R01|MSG00010|P|2.5',
+      'OBR|1|P123|F456|CBC^Complete blood count^L'
+    ].join('\r')
+
+    const result = deidentifyHl7(message)
+
+    expect(result.message).toBe(message)
+    expect(result.changes).toEqual([])
+    expect(result.summary).toEqual({ names: 0, ids: 0, addresses: 0, phones: 0, dobs: 0 })
+  })
+
+  it('makes no changes when the message has only an MSH segment', () => {
+    const message = 'MSH|^~\\&|REG|HOSP|EHR|HOSP|202405091105||ADT^A01|MSG00011|P|2.5'
+
+    const result = deidentifyHl7(message)
+
+    expect(result.message).toBe(message)
+    expect(result.changes).toEqual([])
+    expect(result.summary).toEqual({ names: 0, ids: 0, addresses: 0, phones: 0, dobs: 0 })
+  })
+
+  it('applies the fallback age range for malformed DOB values', () => {
+    const malformedDobs = ['invalid', '2024', '']
+
+    for (const dob of malformedDobs) {
+      const message = [
+        'MSH|^~\\&|REG|HOSP|EHR|HOSP|202405091105||ADT^A01|MSG00012|P|2.5',
+        `PID|1||123456^^^HOSP^MR||Doe^Jane||${dob}`
+      ].join('\r')
+
+      const result = deidentifyHl7(message)
+      const syntheticDob = fieldValue(result.message, 'PID-7') ?? ''
+
+      if (dob.length === 0) {
+        expect(syntheticDob).toBe('')
+      } else {
+        expect(syntheticDob).toMatch(/^\d{8}$/)
+        expect(ageAt(syntheticDob, '202405091105')).toBeGreaterThanOrEqual(20)
+        expect(ageAt(syntheticDob, '202405091105')).toBeLessThanOrEqual(89)
+      }
+    }
+  })
+
+  it('preserves mixed line endings across segments', () => {
+    const message = 'MSH|^~\\&|REG|HOSP|EHR|HOSP|202405091105||ADT^A01|MSG00013|P|2.5\r\nPID|1||123456^^^HOSP^MR||Doe^Jane\rNK1|1|Smith^Sam'
+
+    const result = deidentifyHl7(message)
+
+    expect(result.message).toContain('\r\n')
+    expect(result.message).toContain('\r')
+    expect(parseHl7(result.message).segments).toHaveLength(3)
+    expect(fieldValue(result.message, 'PID-5')).not.toBe('Doe^Jane')
+    expect(fieldValue(result.message, 'NK1-2')).not.toBe('Smith^Sam')
+  })
+
   it('returns an empty result for blank input', () => {
     const result = deidentifyHl7('  \r\n ')
 

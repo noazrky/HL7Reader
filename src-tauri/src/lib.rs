@@ -16,20 +16,20 @@ struct ZoomState(Mutex<f64>);
 
 #[tauri::command]
 fn toggle_menu(window: WebviewWindow) -> Result<bool, String> {
-    let is_visible = window.is_menu_visible().map_err(to_message)?;
+    let is_visible = window.is_menu_visible().map_err(|e| e.to_string())?;
 
     if is_visible {
-        window.hide_menu().map_err(to_message)?;
+        window.hide_menu().map_err(|e| e.to_string())?;
         Ok(false)
     } else {
-        window.show_menu().map_err(to_message)?;
+        window.show_menu().map_err(|e| e.to_string())?;
         Ok(true)
     }
 }
 
 #[tauri::command]
 fn show_about(app: tauri::AppHandle) -> Result<(), String> {
-    open_about_window(&app).map_err(to_message)
+    open_about_window(&app).map_err(|e| e.to_string())
 }
 
 pub fn run() {
@@ -193,7 +193,10 @@ where
     F: FnOnce(&WebviewWindow) -> Result<bool, String>,
 {
     if let Some(window) = app.get_webview_window(MAIN_LABEL) {
-        let _ = action(&window);
+        if let Err(e) = action(&window) {
+            #[cfg(debug_assertions)]
+            eprintln!("[hl7-reader] menu action failed: {e}");
+        }
     }
 }
 
@@ -204,8 +207,9 @@ fn adjust_zoom(app: &tauri::AppHandle, window: &WebviewWindow, delta: f64) -> Re
         .lock()
         .map_err(|_| "Zoom state is unavailable".to_string())?;
     let next_zoom = (*zoom + delta).clamp(MIN_ZOOM, MAX_ZOOM);
-    *zoom = (next_zoom * 10.0).round() / 10.0;
-    window.set_zoom(*zoom).map_err(to_message)?;
+    let rounded = (next_zoom * 10.0).round() / 10.0;
+    window.set_zoom(rounded).map_err(|e| e.to_string())?;
+    *zoom = rounded;
     Ok(true)
 }
 
@@ -215,14 +219,14 @@ fn set_zoom(app: &tauri::AppHandle, window: &WebviewWindow, value: f64) -> Resul
         .0
         .lock()
         .map_err(|_| "Zoom state is unavailable".to_string())?;
+    window.set_zoom(value).map_err(|e| e.to_string())?;
     *zoom = value;
-    window.set_zoom(value).map_err(to_message)?;
     Ok(true)
 }
 
 fn toggle_fullscreen(window: &WebviewWindow) -> Result<bool, String> {
-    let is_fullscreen = window.is_fullscreen().map_err(to_message)?;
-    window.set_fullscreen(!is_fullscreen).map_err(to_message)?;
+    let is_fullscreen = window.is_fullscreen().map_err(|e| e.to_string())?;
+    window.set_fullscreen(!is_fullscreen).map_err(|e| e.to_string())?;
     Ok(!is_fullscreen)
 }
 
@@ -243,10 +247,6 @@ fn open_about_window(app: &tauri::AppHandle) -> tauri::Result<()> {
     about_window.hide_menu()?;
 
     Ok(())
-}
-
-fn to_message(error: tauri::Error) -> String {
-    error.to_string()
 }
 
 #[cfg(test)]

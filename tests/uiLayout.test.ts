@@ -198,6 +198,18 @@ describe('app layout', () => {
     expect(changeRule).toContain('box-decoration-break: clone')
   })
 
+  // Note: CSS is parsed as static text here. Runtime style overrides applied via
+  // JavaScript (e.g. computed variables, media queries, pseudo-class state) are not
+  // visible in these tests — they require a live browser environment.
+  it('provides tree-rendering functions for segments, fields, and components', () => {
+    expect(main).toContain('function renderTree(')
+    expect(main).toContain('function segmentNode(')
+    expect(main).toContain('function fieldNode(')
+    expect(main).toContain('function repetitionNode(')
+    expect(main).toContain('function componentNode(')
+    expect(main).toContain('elements.tree.append(segmentNode(')
+  })
+
   it('does not add runtime network behavior for de-identification', () => {
     expect(main).not.toMatch(/\bfetch\s*\(/)
     expect(main).not.toContain('WebSocket')
