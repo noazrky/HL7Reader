@@ -29,7 +29,14 @@ fn toggle_menu(window: WebviewWindow) -> Result<bool, String> {
 
 #[tauri::command]
 fn show_about(app: tauri::AppHandle) -> Result<(), String> {
-    open_about_window(&app).map_err(|e| e.to_string())
+    let app_handle = app.clone();
+    tauri::async_runtime::spawn(async move {
+        if let Err(_e) = open_about_window(&app_handle) {
+            #[cfg(debug_assertions)]
+            eprintln!("[hl7-reader] failed to open about window: {_e}");
+        }
+    });
+    Ok(())
 }
 
 pub fn run() {
