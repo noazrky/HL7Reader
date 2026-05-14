@@ -193,9 +193,9 @@ where
     F: FnOnce(&WebviewWindow) -> Result<bool, String>,
 {
     if let Some(window) = app.get_webview_window(MAIN_LABEL) {
-        if let Err(e) = action(&window) {
+        if let Err(_e) = action(&window) {
             #[cfg(debug_assertions)]
-            eprintln!("[hl7-reader] menu action failed: {e}");
+            eprintln!("[hl7-reader] menu action failed: {_e}");
         }
     }
 }
