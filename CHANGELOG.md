@@ -9,6 +9,12 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.
 
+## 3.0.4 - 2026-05-14
+
+- Repurposed the top-bar hamburger button so a click opens the About window directly instead of toggling the native menu bar. Ctrl+Shift+M still toggles the menu bar.
+- Updated the hamburger button `aria-label` and `title` from "Toggle menu bar" to "About".
+- Fixed a Windows lockup where opening the About window from a frontend `invoke('show_about')` (the hamburger button or F1) could deadlock the UI thread and render a blank window. The `show_about` Tauri command now spawns the window creation on the async runtime so the invoke handler returns immediately.
+
 ## 3.0.2 - 2026-05-14
 
 - Debounced the input event handler so parse and tree-render only fire 150 ms after the last keystroke, keeping the highlight overlay in real-time sync without layout thrash on every character.

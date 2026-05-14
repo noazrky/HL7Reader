@@ -345,6 +345,36 @@ Troubleshooting notes:
 - If the pasted message scrolls away with the parsed tree, check the `.input-panel` sticky positioning in `src/styles/styles.css`.
 - If the parser rows become hard to scan, compare the path/name/value grid rules in `src/styles/styles.css` with the UI layout regression in `tests/uiLayout.test.ts`.
 
+### 3.0.4
+
+Generation: Tauri.
+
+What changed:
+
+- Repurposed the top-bar hamburger button so a click invokes `show_about` directly instead of `toggle_menu`. Ctrl+Shift+M still toggles the native menu bar.
+- Updated the hamburger button `aria-label` and `title` to "About".
+- Fixed a Windows lockup where opening the About window from a frontend `invoke('show_about')` (hamburger button or F1) could deadlock the UI thread and produce a blank window. The `show_about` command now wraps `open_about_window` in `tauri::async_runtime::spawn`, returning immediately from the invoke handler so the main thread is free to paint the new window.
+
+Build steps used:
+
+```powershell
+npm test
+npm run build
+npm run tauri:build
+```
+
+Expected artifact:
+
+```text
+release/HL7 Reader 3.0.4.exe
+```
+
+Troubleshooting notes:
+
+- If clicking the hamburger button locks the app or opens a blank window, confirm `show_about` in `src-tauri/src/lib.rs` spawns window creation on the async runtime rather than building the window inline.
+- If the hamburger button opens the native menu bar instead of About, check that the click handler in `src/main.ts` invokes `show_about` (not `toggle_menu`).
+- If Ctrl+Shift+M no longer toggles the menu bar, the `toggle_menu` command and menu accelerator binding in `src-tauri/src/lib.rs` should still be wired up.
+
 ## Common Troubleshooting Checklist
 
 ### `npm test` fails
@@ -425,3 +455,4 @@ Also check:
 - A sample HL7 message parses into segments, fields, components, and values.
 - Ctrl+Shift+M toggles the menu bar.
 - F1 opens About.
+- The top-bar hamburger button opens About without opening a blank window or locking the app.

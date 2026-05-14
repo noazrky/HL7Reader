@@ -6,6 +6,14 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '3.0.4',
+    date: '2026-05-14',
+    changes: [
+      'Repurposed the top-bar hamburger button to open the About window directly instead of toggling the native menu bar. Ctrl+Shift+M still toggles the menu bar.',
+      'Fixed a Windows lockup where opening the About window from a frontend invoke (hamburger button or F1) could deadlock the UI thread and render a blank window; the show_about command now spawns the window creation on the async runtime.'
+    ]
+  },
+  {
     version: '3.0.3',
     date: '2026-05-13',
     changes: [
