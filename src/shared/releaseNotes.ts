@@ -6,6 +6,13 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '3.0.3',
+    date: '2026-05-13',
+    changes: [
+      'Updated the About window color scheme to match the main app palette in both dark and light modes.'
+    ]
+  },
+  {
     version: '3.0.2',
     date: '2026-05-14',
     changes: [
