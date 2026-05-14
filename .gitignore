@@ -10,3 +10,5 @@ src-tauri/target/
 .DS_Store
 Thumbs.db
 src-tauri/.cargo/
+
+.claude/
