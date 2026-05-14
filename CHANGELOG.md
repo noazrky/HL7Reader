@@ -5,6 +5,12 @@ All project changes are tracked using the `Major.Minor.Change` version format de
 ## Unreleased
 
 - Added a root `VERSION` file as the source of truth for the active Tauri app version.
+
+## 3.0.3 - 2026-05-13
+
+- Restyled the About window so its colour palette, font weights, and button shape mirror the main window. Added sync comments in `src/styles/about.css` and `src/styles/styles.css` so future palette changes are kept in step.
+- Replaced the top-right hamburger button with a subtle pill that shows the current app version and opens the About / version history on click. The native menu bar remains reachable via Ctrl+Shift+M and About via F1.
+- Removed the now-unused `.icon-button` styles and split topbar hover/focus rules so the new `.version-pill` has its own hover treatment without regressing existing buttons.
 - Added version sync/check tooling so package, Cargo, Tauri, release artifact, and About-screen version metadata derive from `VERSION` or fail the build when stale.
 - Updated versioning and build documentation to describe the new source-of-truth flow.
 - Disabled Tauri installer bundling in the default config and guarded the release copy step so the documented no-installer EXE remains the normal release artifact.

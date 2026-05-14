@@ -46,10 +46,8 @@ app.innerHTML = `
         <h1>HL7 Reader</h1>
       </div>
       <div class="topbar-actions">
-        <button class="icon-button" id="menu-toggle" type="button" aria-label="Toggle menu bar" title="Toggle menu bar">
-          <span></span>
-          <span></span>
-          <span></span>
+        <button class="version-pill" id="about-trigger" type="button" title="About HL7 Reader (F1)">
+          v${__APP_VERSION__}
         </button>
       </div>
     </header>
@@ -118,7 +116,7 @@ const deidentifyHighlightedOutput = document.querySelector<HTMLElement>('#deiden
 const deidentifyCopy = document.querySelector<HTMLButtonElement>('#deidentify-copy')
 const wrapWarning = document.querySelector<HTMLElement>('#wrap-warning')
 const showEmpty = document.querySelector<HTMLInputElement>('#show-empty')
-const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle')
+const aboutTrigger = document.querySelector<HTMLButtonElement>('#about-trigger')
 const messageSummary = document.querySelector<HTMLElement>('#message-summary')
 const parseSummary = document.querySelector<HTMLElement>('#parse-summary')
 const warnings = document.querySelector<HTMLElement>('#warnings')
@@ -136,7 +134,7 @@ if (
   !deidentifyCopy ||
   !wrapWarning ||
   !showEmpty ||
-  !menuToggle ||
+  !aboutTrigger ||
   !messageSummary ||
   !parseSummary ||
   !warnings ||
@@ -157,7 +155,7 @@ const elements = {
   deidentifyCopy,
   wrapWarning,
   showEmpty,
-  menuToggle,
+  aboutTrigger,
   messageSummary,
   parseSummary,
   warnings,
@@ -221,8 +219,8 @@ elements.deidentifyCopy.addEventListener('click', () => {
   void copyDeidentifiedOutput()
 })
 
-elements.menuToggle.addEventListener('click', () => {
-  void invoke('toggle_menu')
+elements.aboutTrigger.addEventListener('click', () => {
+  void invoke('show_about')
 })
 
 document.addEventListener('keydown', (event) => {

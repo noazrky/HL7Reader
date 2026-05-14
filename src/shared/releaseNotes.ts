@@ -6,6 +6,15 @@ export type ReleaseNote = {
 
 export const releaseNotes: ReleaseNote[] = [
   {
+    version: '3.0.3',
+    date: '2026-05-13',
+    changes: [
+      'Restyled the About window to mirror the main window palette, typography, and button styling, with sync comments tying the two stylesheets together.',
+      'Replaced the top-right hamburger button with a subtle version pill that shows the current app version and opens the About / version history on click.',
+      'Removed the now-unused .icon-button styles and consolidated topbar action hover/focus rules.'
+    ]
+  },
+  {
     version: '3.0.2',
     date: '2026-05-14',
     changes: [
