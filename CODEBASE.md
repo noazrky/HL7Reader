@@ -2,6 +2,8 @@
 
 HL7 Reader keeps the current Tauri implementation at the workspace root. The previous Electron implementation has been removed from the working tree now that the Tauri app is stable.
 
+For agent-oriented file routing, see `REFERENCE_STRUCTURE.md`. It is intended to reduce broad repo ingestion by pointing Codex and other agents to the smallest useful file set for common tasks.
+
 For build history, release steps, and troubleshooting notes, see `BUILD_HISTORY.md`.
 
 For version policy and the canonical app version source, see `VERSIONING.md`. The active Tauri app version is sourced from the root `VERSION` file; package, Cargo, Tauri, and About-screen version values are generated or checked from that file.
